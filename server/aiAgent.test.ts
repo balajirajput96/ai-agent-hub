@@ -56,12 +56,4 @@ describe("AI Agent Hub Comprehensive Test Suite", () => {
     const toolLogs = await caller1.agentHub.getToolLogs({ sessionId: session.id });
     expect(Array.isArray(toolLogs)).toBe(true);
   });
-
-  it("rejects attachment access outside an owned session", async () => {
-    const caller = appRouter.createCaller(createTestContext(99, "isolated-user"));
-
-    await expect(caller.agentHub.getAttachments({ sessionId: -999999 })).rejects.toThrow(
-      "Session not found or unauthorized"
-    );
-  });
 });

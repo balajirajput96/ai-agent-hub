@@ -164,18 +164,16 @@ export async function checkIntegrationsHealth() {
   const hfToken = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN || "";
   const ghToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
 
-  let hfStatus = "connected";
+  let hfStatus = "optional";
   let ghStatus = "connected";
 
   try {
     const testRes = await fetch("https://huggingface.co/api/whoami-v2", {
       headers: hfToken ? { Authorization: `Bearer ${hfToken}` } : {},
     });
-    if (!testRes.ok && hfToken) {
-      hfStatus = "degraded";
-    }
+    hfStatus = testRes.ok ? "connected" : "authorization_required";
   } catch {
-    hfStatus = hfToken ? "connected" : "guest_mode";
+    hfStatus = "optional";
   }
 
   try {
