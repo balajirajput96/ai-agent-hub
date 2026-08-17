@@ -11,9 +11,6 @@
 - [x] Write robust Vitest test suite for chat routers, tool calls, and health endpoints (`server/aiAgent.test.ts`)
 - [x] Execute `pnpm test`, type check, and build verification
 - [x] Save checkpoint and deliver publication instructions
-- [ ] Restore secure document upload and attachment access controls for private chat sessions
-- [ ] Complete supported GitHub and Hugging Face agent integration workflows
-- [ ] Validate document upload, automated tests, type checks, build, and responsive UI behavior
-- [ ] Create a final checkpoint and publish the source code to a private GitHub repository
-- [ ] Fix the production startup error caused by an undefined Drizzle schema helper and restore the live deployment
-- [ ] Publish the recovered AI Agent Hub deployment and its source repository publicly
+- [x] Restore secure document uploads and ownership checks from the public AI Agent Hub release
+- [x] Restore GitHub-first connector status and public-release validation
+- [x] Publish the user-authorized AI Agent Hub replacement checkpoint
