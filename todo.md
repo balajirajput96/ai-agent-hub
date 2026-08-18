@@ -14,3 +14,34 @@
 - [x] Restore secure document uploads and ownership checks from the public AI Agent Hub release
 - [x] Restore GitHub-first connector status and public-release validation
 - [x] Publish the user-authorized AI Agent Hub replacement checkpoint
+- [x] Synchronize the public source repository with the final deployed code
+- [x] Prepare a safe source, terminal-action, and authorization audit package
+- [x] Verify the public source snapshot matches the final AI Agent Hub implementation
+- [x] Document intentional source differences and complete repository-wide parity verification
+- [x] Inventory all current code, test, build, and GitHub Actions failures
+- [x] Fix each confirmed code or configuration failure and add regression coverage
+- [x] Re-run all local validation and confirm GitHub workflow runs succeed
+- [x] Publish the fully validated repository state to GitHub
+- [x] Verify final repository-wide GitHub source parity and document intentional shared-project exclusions
+- [x] Re-inventory all current local and GitHub validation states
+- [x] Fix every confirmed remaining code, dependency, test, or CI failure
+- [x] Repeat all local validation and GitHub Actions checks until successful
+- [x] Publish the final validated source and workflow status to GitHub
+- [x] Reproduce and resolve every currently active local or GitHub validation failure
+- [x] Run a clean full validation and fresh GitHub Actions CI after all fixes
+- [x] Verify the published repository head and latest workflow are successful
+- [x] Audit the latest source, dependencies, tests, build, and GitHub Actions state again
+- [x] Fix any newly reproducible code, dependency, test, or CI issue
+- [x] Repeat local and GitHub validation until the latest run is successful
+- [x] Revalidate latest code, dependencies, tests, build, and GitHub CI state
+- [x] Fix any active reproducible validation failure and rerun all required checks
+- [x] Prepare a safe source-code, terminal-action, and verified authorization audit package
+- [x] Inventory current dependency alerts, code-quality risks, and deployment readiness gaps
+- [x] Implement safe reliability, security, and CI improvements
+- [x] Verify improvements with complete local checks and fresh GitHub CI
+- [x] Publish validated improvements and confirm the updated workflow health
+- [x] Audit bundle size, runtime health, and integration readiness for the next improvement stage
+- [x] Implement safe performance, resilience, and user-experience improvements
+- [ ] Validate improvements with local checks, visual verification, and GitHub CI
+- [ ] Publish validated next-stage improvements and confirm production health
+- [x] Fix the compact mobile layout so the active chat area is reachable without horizontal scrolling

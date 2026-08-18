@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Streamdown } from "streamdown";
 import { 
   Bot, 
   Send, 
@@ -18,6 +17,8 @@ import {
   Terminal, 
   Activity, 
   LogOut, 
+  Menu,
+  MessageSquare,
   User as UserIcon,
   Sparkles,
   Layers,
@@ -25,6 +26,8 @@ import {
   FileText,
   X
 } from "lucide-react";
+
+const MarkdownContent = lazy(() => import("@/components/MarkdownContent"));
 
 // import startLogin if available or define local redirect
 const startLogin = () => {
@@ -39,6 +42,7 @@ export default function ChatDashboard() {
   const [newSessionTitle, setNewSessionTitle] = useState("");
   const [inputMessage, setInputMessage] = useState("");
   const [useAgent, setUseAgent] = useState(true);
+  const [mobilePanel, setMobilePanel] = useState<"chat" | "sessions" | "logs">("chat");
   const [selectedAttachment, setSelectedAttachment] = useState<{ id: number; fileName: string } | null>(null);
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -171,9 +175,9 @@ export default function ChatDashboard() {
   const healthData = healthQuery.data;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row overflow-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-slate-950 text-slate-100 md:flex">
       {/* Sidebar: Sessions & Integration Health */}
-      <aside className="w-full md:w-80 bg-slate-900/90 border-r border-slate-800 flex flex-col h-screen">
+      <aside className={`${mobilePanel === "sessions" ? "flex" : "hidden"} h-[100dvh] w-full flex-col border-r border-slate-800 bg-slate-900/90 md:flex md:h-screen md:w-80 md:shrink-0`}>
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-500/20">
@@ -184,9 +188,14 @@ export default function ChatDashboard() {
               <p className="text-xs text-slate-400">Autonomous Assistant</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => logout()} title="Logout">
-            <LogOut className="w-4 h-4 text-slate-400 hover:text-white" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobilePanel("chat")} title="Back to chat">
+              <X className="w-4 h-4 text-slate-400 hover:text-white" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => logout()} title="Logout">
+              <LogOut className="w-4 h-4 text-slate-400 hover:text-white" />
+            </Button>
+          </div>
         </div>
 
         {/* Integration Health Indicators */}
@@ -265,30 +274,42 @@ export default function ChatDashboard() {
       </aside>
 
       {/* Main Chat & Tool Logs Area */}
-      <main className="flex-1 flex flex-col h-screen bg-slate-950">
+      <main className={`${mobilePanel === "sessions" ? "hidden" : "flex"} h-[100dvh] min-w-0 w-full flex-1 flex-col bg-slate-950 md:flex md:h-screen`}>
         {/* Chat Header */}
-        <header className="h-16 border-b border-slate-800 px-6 flex items-center justify-between bg-slate-900/50 backdrop-blur">
-          <div className="flex items-center gap-3">
+        <header className="flex h-16 items-center justify-between gap-3 border-b border-slate-800 bg-slate-900/50 px-4 backdrop-blur sm:px-6">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="icon" className="shrink-0 md:hidden" onClick={() => setMobilePanel("sessions")} title="Open sessions">
+              <Menu className="w-4 h-4 text-slate-300" />
+            </Button>
             <div className="w-8 h-8 rounded-lg bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30">
               <Bot className="w-4 h-4 text-indigo-400" />
             </div>
-            <div>
-              <h2 className="font-semibold text-sm">
+            <div className="min-w-0">
+              <h2 className="truncate font-semibold text-sm">
                 {sessionsQuery.data?.find((s) => s.id === activeSessionId)?.title || "Select a session"}
               </h2>
-              <p className="text-[11px] text-slate-400">Private agent workspace with verified GitHub tools</p>
+              <p className="truncate text-[11px] text-slate-400">Private agent workspace with verified GitHub tools</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMobilePanel(mobilePanel === "logs" ? "chat" : "logs")}
+              className="border-slate-800 bg-slate-900 text-xs text-slate-300 lg:hidden"
+            >
+              {mobilePanel === "logs" ? <MessageSquare className="w-3.5 h-3.5" /> : <Terminal className="w-3.5 h-3.5" />}
+              <span className="ml-1.5 hidden sm:inline">{mobilePanel === "logs" ? "Chat" : "Logs"}</span>
+            </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setUseAgent(!useAgent)}
               className={`text-xs border-slate-800 ${useAgent ? "bg-indigo-600/10 text-indigo-300 border-indigo-500/30" : "bg-slate-900 text-slate-400"}`}
             >
-              <Terminal className="w-3.5 h-3.5 mr-1.5" />
-              Agentic Tools: {useAgent ? "Active" : "Disabled"}
+              <Terminal className="w-3.5 h-3.5 sm:mr-1.5" />
+              <span className="hidden sm:inline">Agentic Tools: </span>{useAgent ? "Active" : "Disabled"}
             </Button>
           </div>
         </header>
@@ -296,7 +317,7 @@ export default function ChatDashboard() {
         {/* Content Layout: Chat History & Tool Panel */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           {/* Chat Messages */}
-          <div className="flex-1 flex flex-col h-full bg-slate-950">
+          <div className={`${mobilePanel === "logs" ? "hidden" : "flex"} min-h-0 flex-1 flex-col bg-slate-950 lg:flex`}>
             <ScrollArea className="flex-1 p-6 space-y-6">
               {!activeSessionId ? (
                 <div className="h-full flex flex-col items-center justify-center text-center text-slate-500 space-y-3">
@@ -330,7 +351,9 @@ export default function ChatDashboard() {
                             : "bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-sm"
                         }`}
                       >
-                        <Streamdown>{msg.content}</Streamdown>
+                        <Suspense fallback={<span className="whitespace-pre-wrap">{msg.content}</span>}>
+                          <MarkdownContent content={msg.content} />
+                        </Suspense>
                       </div>
                       {msg.role === "user" && (
                         <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700">
@@ -359,7 +382,7 @@ export default function ChatDashboard() {
           </div>
 
           {/* Right Panel: Live Agent Tool Execution Logs */}
-          <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-800 bg-slate-900/60 flex flex-col h-72 lg:h-full">
+          <div className={`${mobilePanel === "logs" ? "flex" : "hidden"} h-full w-full flex-col border-t border-slate-800 bg-slate-900/60 lg:flex lg:h-full lg:w-80 lg:border-l lg:border-t-0`}>
             <div className="p-4 border-b border-slate-800 flex items-center justify-between">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 text-indigo-400" />
