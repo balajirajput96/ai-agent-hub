@@ -167,6 +167,8 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    // Large dependency graphs can make gzip-size reporting exhaust constrained CI memory.
+    reportCompressedSize: false,
   },
   server: {
     host: true,
