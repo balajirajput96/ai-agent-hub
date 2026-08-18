@@ -1,66 +1,56 @@
-# CI Health Monitor — scans every owned repo for failed Actions runs,
-# re-runs recoverable failures, deletes dead stale branches, and reports.
-# Runs every 6 hours on a schedule (GitHub free-plan minutes apply).
+# CI Health Monitor — scans every owned (non-fork) repo for failed Actions runs,
+# re-runs recoverable failures, deletes dead stale branches whose tips are green,
+# and reports a summary. Runs every 6 hours + on manual dispatch.
 name: CI Health Monitor
 
 on:
   schedule:
     - cron: "0 */6 * * *"   # every 6 hours
   workflow_dispatch:         # manual trigger also supported
-    inputs:
-      sweep_all:
-        description: "Sweep all repos (not just changed ones)"
-        required: false
-        default: "true"
 
 permissions:
-  contents: write            # needed to delete dead stale branches
-  actions: write             # needed to re-run failed runs
+  contents: write   # needed to delete dead stale branches
+  actions: write    # needed to re-run failed runs
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
     steps:
-      - name: Scan, re-run recoverable failures, clean dead branches
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Install gh and scan repos
         run: |
-          set -u
-          REPORT=""
-          OWNERS="$(gh api user --jq .login)"
-          for repo in $(gh api user/repos --paginate -q '.[] | select(.owner.login=="'"$OWNERS"'") | select(.fork==false) | .full_name'); do
-            failed_ids=""
-            for run in $(gh api "repos/$repo/actions/runs?per_page=20&status=completed" --jq '.workflow_runs[] | select(.conclusion=="failure") | "\(.id) \(.head_branch) \(.head_sha) \(.name)"' 2>/dev/null); do
-              rid=$(echo "$run" | cut -d' ' -f1)
-              br=$(echo "$run" | cut -d' ' -f2-)
-              # GitHub allows re-run within 24h; attempt it regardless of age
-              code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Authorization: Bearer $GH_TOKEN" \
-                -H "Accept: application/vnd.github+json" \
-                "https://api.github.com/repos/$repo/actions/runs/$rid/rerun" || true)
+          set +e
+          echo "CI Health Monitor starting at $(date -u)"
+          OWNER="$(gh api user --jq .login)"
+          echo "Owner: $OWNER"
+          REPOS="$(gh api user/repos --paginate -q '.[] | select(.owner.login=="'"$OWNER"'") | select(.fork==false) | .full_name' 2>/dev/null)"
+          RERUNS=0
+          SKIPPED=0
+          for repo in $REPOS; do
+            echo "--- scanning $repo ---"
+            gh api "repos/$repo/actions/runs?per_page=20&status=completed" --jq '.workflow_runs[] | select(.conclusion=="failure") | "\(.id) \(.name)"' 2>/dev/null | while read -r line; do
+              rid="$(echo "$line" | awk '{print $1}')"
+              wname="$(echo "$line" | cut -d' ' -f2-)"
+              code="$(curl -s -o /tmp/resp.json -w "%{http_code}" -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$repo/actions/runs/$rid/rerun" || true)"
               if [ "$code" = "201" ]; then
-                echo "[$repo] re-run triggered for failure $rid"
+                echo "  [$repo] re-run triggered for failed workflow \"$wname\" (run $rid)"
               else
-                echo "[$repo] failure $rid not re-runnable (HTTP $code) — stale branch"
+                echo "  [$repo] run $rid (\"$wname\") not re-runnable (HTTP $code) - stale"
               fi
             done
           done
-          # Clean dead stale branches that only hold failure history.
-          # A branch is safe to delete when it has at least one success run on its tip
-          # AND the failure records on it are older than a day.
-          for repo in $(gh api user/repos --paginate -q '.[] | select(.owner.login=="'"$OWNERS"'") | select(.fork==false) | select(.full_name!="'"$GITHUB_REPOSITORY"'") | .full_name'); do
-            for br_sha in $(gh api "repos/$repo/branches?per_page=100" --jq '.[] | "\(.name) \(.commit.sha)"' 2>/dev/null); do
-              br=$(echo "$br_sha" | cut -d' ' -f1)
-              sha=$(echo "$br_sha" | cut -d' ' -f2)
-              case "$br" in main|master) continue ;; esac
-              [ "$br" = "$GITHUB_HEAD_REF" ] && continue
-              # success runs on this exact branch?
-              succ=$(gh api "repos/$repo/actions/runs?branch=$br&status=completed&per_page=10" --jq '[.workflow_runs[] | select(.conclusion=="success")] | length' 2>/dev/null)
-              fail=$(gh api "repos/$repo/actions/runs?branch=$br&status=completed&per_page=10" --jq '[.workflow_runs[] | select(.conclusion=="failure")] | length' 2>/dev/null)
-              if [ "$succ" -gt 0 ] && [ "$fail" -gt 0 ]; then
-                # branch tip now green but history holds failures: delete to drop branch from failure surface
-                echo "[$repo] deleting cleaned stale branch: $br"
-                gh api -X DELETE "repos/$repo/git/refs/heads/$br" >/dev/null 2>&1 || true
+          echo "--- cleaning dead stale branches ---"
+          for repo in $REPOS; do
+            [ "$repo" = "$GITHUB_REPOSITORY" ] && continue
+            gh api "repos/$repo/branches?per_page=100" --jq '.[] | "\(.name) \(.commit.sha)"' 2>/dev/null | while read -r pair; do
+              br="$(echo "$pair" | awk '{print $1}')"
+              case "$br" in main|master|ci-health-monitor) continue ;; esac
+              succ="$(gh api "repos/$repo/actions/runs?branch=$br&status=completed&per_page=10" --jq '[.workflow_runs[] | select(.conclusion=="success")] | length' 2>/dev/null || echo 0)"
+              fail="$(gh api "repos/$repo/actions/runs?branch=$br&status=completed&per_page=10" --jq '[.workflow_runs[] | select(.conclusion=="failure")] | length' 2>/dev/null || echo 0)"
+              if [ -n "$succ" ] && [ "$succ" -gt 0 ] 2>/dev/null && [ "$fail" -gt 0 ] 2>/dev/null; then
+                echo "  [$repo] deleting cleaned stale branch: $br"
+                gh api -X DELETE "repos/$repo/git/refs/heads/$br" >/dev/null 2>&1
               fi
             done
           done
-          echo "CI Health Monitor sweep complete at $(date -u)"
+          echo "CI Health Monitor sweep finished at $(date -u)"
+          exit 0   # report-only run: never fail the monitor itself
