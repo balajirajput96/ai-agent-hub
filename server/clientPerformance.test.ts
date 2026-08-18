@@ -13,9 +13,10 @@ describe("client loading strategy", () => {
       readFile(path.join(projectRoot, "vite.config.ts"), "utf8"),
     ]);
 
-    expect(appSource).not.toContain('FacebookProfileWorkspace');
+    expect(appSource).not.toContain("FacebookProfileWorkspace");
     expect(dashboardSource).toContain('lazy(() => import("@/components/MarkdownContent"))');
     expect(dashboardSource).toContain('useState<"chat" | "sessions" | "logs">("chat")');
+    expect(dashboardSource).toContain('CardTitle className="text-2xl font-bold tracking-tight text-white"');
     expect(dashboardSource).not.toContain('from "streamdown"');
     expect(markdownSource).toContain('from "streamdown"');
     expect(viteSource).toContain("manualChunks(id)");

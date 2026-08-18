@@ -42,6 +42,12 @@
 - [x] Publish validated improvements and confirm the updated workflow health
 - [x] Audit bundle size, runtime health, and integration readiness for the next improvement stage
 - [x] Implement safe performance, resilience, and user-experience improvements
-- [ ] Validate improvements with local checks, visual verification, and GitHub CI
+- [x] Validate improvements with local checks, visual verification, and GitHub CI
 - [ ] Publish validated next-stage improvements and confirm production health
 - [x] Fix the compact mobile layout so the active chat area is reachable without horizontal scrolling
+- [x] Restore public-source parity so every published route references source files included in the GitHub repository
+- [x] Commit and push the public-source parity fix to GitHub
+- [x] Confirm a fresh GitHub Actions CI success for the repaired public repository revision
+- [ ] Save a managed deployment checkpoint for the next-stage performance and mobile-layout improvements
+- [ ] Confirm the live deployed app on the new checkpoint before closing the release
+- [ ] Fix authentication-screen title contrast so the sign-in experience meets readable dark-theme presentation standards

@@ -112,7 +112,7 @@ export default function ChatDashboard() {
             <div className="mx-auto w-16 h-16 rounded-2xl bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30">
               <Bot className="w-8 h-8 text-indigo-400" />
             </div>
-            <CardTitle className="text-2xl font-bold tracking-tight">AI Agent Hub</CardTitle>
+            <CardTitle className="text-2xl font-bold tracking-tight text-white">AI Agent Hub</CardTitle>
             <p className="text-sm text-slate-400">
               Sign in with your Manus account to access autonomous multi-step agents, GitHub repos, and Hugging Face inference models.
             </p>
