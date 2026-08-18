@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/sonner";
-import { Suspense, lazy } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
@@ -7,18 +6,11 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ChatDashboard from "./pages/ChatDashboard";
 
-const FacebookProfileWorkspace = lazy(() => import("./pages/FacebookProfileWorkspace"));
-
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={ChatDashboard} />
-      <Route path={"/facebook-profile"}>
-        <Suspense fallback={<main className="min-h-screen bg-slate-950 p-8 text-slate-200">Loading workspace…</main>}>
-          <FacebookProfileWorkspace />
-        </Suspense>
-      </Route>
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
