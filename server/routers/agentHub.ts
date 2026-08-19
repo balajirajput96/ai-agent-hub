@@ -7,14 +7,9 @@ import { getDb } from "../db";
 import { chatAttachments, chatSessions } from "../../drizzle/schema";
 import * as chatDb from "../services/chatDb";
 import * as agentTools from "../services/agentTools";
+import { decodeDocumentPayload, isAllowedDocument } from "../services/documentValidation";
 
 const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024;
-const ALLOWED_DOCUMENT_TYPES = new Set(["application/pdf", "text/plain", "text/markdown", "text/csv", "application/json"]);
-
-function isAllowedDocument(fileName: string, mimeType: string) {
-  const extension = fileName.toLowerCase().split(".").pop();
-  return ALLOWED_DOCUMENT_TYPES.has(mimeType) && ["pdf", "txt", "md", "csv", "json"].includes(extension || "");
-}
 
 async function requireOwnedSession(sessionId: number, userId: number) {
   const db = await getDb();
@@ -44,8 +39,7 @@ export const agentHubRouter = router({
   uploadAttachment: protectedProcedure.input(z.object({ sessionId: z.number(), fileName: z.string().min(1).max(255), fileBase64: z.string().min(1), mimeType: z.string().min(1) })).mutation(async ({ ctx, input }) => {
     const { db } = await requireOwnedSession(input.sessionId, ctx.user.id);
     if (!isAllowedDocument(input.fileName, input.mimeType)) throw new Error("Only PDF, TXT, MD, CSV, and JSON documents can be uploaded.");
-    const bytes = Buffer.from(input.fileBase64.replace(/^data:[^;]+;base64,/, ""), "base64");
-    if (!bytes.length) throw new Error("The selected document is empty.");
+    const bytes = decodeDocumentPayload(input.fileBase64, input.mimeType);
     if (bytes.length > MAX_DOCUMENT_BYTES) throw new Error("Documents must be 8 MB or smaller.");
     const fileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
     const upload = await storagePut(`chat-attachments/${ctx.user.id}/${input.sessionId}/${Date.now()}-${fileName}`, bytes, input.mimeType);

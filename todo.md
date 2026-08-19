@@ -43,11 +43,20 @@
 - [x] Audit bundle size, runtime health, and integration readiness for the next improvement stage
 - [x] Implement safe performance, resilience, and user-experience improvements
 - [x] Validate improvements with local checks, visual verification, and GitHub CI
-- [ ] Publish validated next-stage improvements and confirm production health
+- [x] Publish validated next-stage improvements and confirm production health
 - [x] Fix the compact mobile layout so the active chat area is reachable without horizontal scrolling
 - [x] Restore public-source parity so every published route references source files included in the GitHub repository
 - [x] Commit and push the public-source parity fix to GitHub
 - [x] Confirm a fresh GitHub Actions CI success for the repaired public repository revision
-- [ ] Save a managed deployment checkpoint for the next-stage performance and mobile-layout improvements
-- [ ] Confirm the live deployed app on the new checkpoint before closing the release
-- [ ] Fix authentication-screen title contrast so the sign-in experience meets readable dark-theme presentation standards
+- [x] Save a managed deployment checkpoint for the next-stage performance and mobile-layout improvements
+- [x] Confirm the live deployed app on the new checkpoint before closing the release
+- [x] Fix authentication-screen title contrast so the sign-in experience meets readable dark-theme presentation standards
+- [x] Recheck production asset propagation after the final checkpoint and confirm the readable authentication heading is live
+- [x] Verify the live production DOM serves the readable authentication-heading class after asset propagation
+- [x] Audit integration readiness, release safety, and chat workflow usability for the next production stage
+- [x] Implement the highest-value safe integration and chat workflow improvements
+- [ ] Validate the next-stage improvements with local checks, accessibility review, and GitHub CI
+- [ ] Publish the next-stage improvements and confirm production health
+- [x] Enforce strict document payload validation before storage upload
+- [x] Surface session and message action failures directly in the chat interface
+- [x] Add clear Hugging Face authorization guidance when the connector is enabled but unavailable

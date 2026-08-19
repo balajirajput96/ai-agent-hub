@@ -40,7 +40,9 @@ export default function ChatDashboard() {
 
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [newSessionTitle, setNewSessionTitle] = useState("");
+  const [sessionError, setSessionError] = useState("");
   const [inputMessage, setInputMessage] = useState("");
+  const [messageError, setMessageError] = useState("");
   const [useAgent, setUseAgent] = useState(true);
   const [mobilePanel, setMobilePanel] = useState<"chat" | "sessions" | "logs">("chat");
   const [selectedAttachment, setSelectedAttachment] = useState<{ id: number; fileName: string } | null>(null);
@@ -76,7 +78,9 @@ export default function ChatDashboard() {
       utils.agentHub.getSessions.invalidate();
       setActiveSessionId(newSession.id);
       setNewSessionTitle("");
+      setSessionError("");
     },
+    onError: (error) => setSessionError(error.message),
   });
 
   const uploadAttachmentMutation = trpc.agentHub.uploadAttachment.useMutation({
@@ -92,9 +96,11 @@ export default function ChatDashboard() {
     onSuccess: () => {
       setInputMessage("");
       setSelectedAttachment(null);
+      setMessageError("");
       utils.agentHub.getMessages.invalidate({ sessionId: activeSessionId! });
       utils.agentHub.getToolLogs.invalidate({ sessionId: activeSessionId! });
     },
+    onError: (error) => setMessageError(error.message),
   });
 
   // Select first session by default when loaded
@@ -224,6 +230,9 @@ export default function ChatDashboard() {
                 {healthData?.huggingface.status || "Checking..."}
               </Badge>
             </div>
+            {healthData?.huggingface.status === "authorization_required" && (
+              <p className="px-1 text-[11px] leading-relaxed text-amber-300/80">Authorization is required before Hugging Face inference can run.</p>
+            )}
           </div>
         </div>
 
@@ -240,6 +249,7 @@ export default function ChatDashboard() {
               <Plus className="w-4 h-4" />
             </Button>
           </form>
+          {sessionError && <p className="mt-2 text-xs text-rose-300" role="alert">{sessionError}</p>}
         </div>
 
         <ScrollArea className="flex-1 p-3">
@@ -372,6 +382,7 @@ export default function ChatDashboard() {
                 <input ref={fileInputRef} type="file" accept="application/pdf,text/plain,text/markdown,text/csv,application/json,.pdf,.txt,.md,.csv,.json" onChange={handleFileSelection} className="hidden" />
                 {selectedAttachment && <div className="mb-2 inline-flex max-w-full items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-xs text-indigo-200"><FileText className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{selectedAttachment.fileName}</span><button type="button" onClick={() => setSelectedAttachment(null)}><X className="h-3.5 w-3.5" /></button></div>}
                 {uploadError && <p className="mb-2 text-xs text-rose-300">{uploadError}</p>}
+                {messageError && <p className="mb-2 text-xs text-rose-300" role="alert">{messageError}</p>}
                 <div className="flex gap-3">
                   <Button type="button" variant="outline" size="icon" disabled={!activeSessionId || uploadAttachmentMutation.isPending} onClick={() => fileInputRef.current?.click()} className="h-12 w-12 shrink-0 border-slate-800 bg-slate-950"><Paperclip className="h-4 w-4" /></Button>
                   <Input placeholder={uploadAttachmentMutation.isPending ? "Uploading document…" : "Ask the AI agent or discuss an uploaded document…"} value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} disabled={!activeSessionId || sendMessageMutation.isPending || uploadAttachmentMutation.isPending} className="bg-slate-950 border-slate-800 text-white focus-visible:ring-indigo-500 py-6" />
