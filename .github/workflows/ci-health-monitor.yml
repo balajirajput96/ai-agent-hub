@@ -24,7 +24,9 @@ jobs:
           set -u
           echo "CI Health Monitor starting at $(date -u)"
           REPO="$GITHUB_REPOSITORY"
+          CURRENT_SHA="$GITHUB_SHA"
           echo "Repository: $REPO"
+          echo "Current commit: $CURRENT_SHA"
           failures=0
           reruns=0
           skipped=0
@@ -46,7 +48,7 @@ jobs:
             fi
           done < <(
             gh api "repos/$REPO/actions/runs?per_page=20&status=completed" \
-              --jq '.workflow_runs[] | select(.conclusion=="failure") | [.id,.name] | @tsv' \
+              --jq ".workflow_runs[] | select(.conclusion==\"failure\" and .head_sha==\"$CURRENT_SHA\") | [.id,.name] | @tsv" \
               2>/dev/null || true
           )
 
@@ -56,6 +58,7 @@ jobs:
             echo "- Failed runs found: $failures"
             echo "- Re-runs requested: $reruns"
             echo "- Skipped/unavailable: $skipped"
+            echo "- Failure scope: current commit only; historical run records are not re-run"
             echo "- Cross-repository actions: not attempted (token scope safety)"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "CI Health Monitor finished at $(date -u)"
