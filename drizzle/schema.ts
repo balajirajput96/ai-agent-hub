@@ -79,3 +79,143 @@ export type AgentToolLog = typeof agentToolLogs.$inferSelect;
 export type InsertAgentToolLog = typeof agentToolLogs.$inferInsert;
 export type ChatAttachment = typeof chatAttachments.$inferSelect;
 export type InsertChatAttachment = typeof chatAttachments.$inferInsert;
+
+/**
+ * Immutable delivery receipts for the owner’s read-only GitHub and Drive summary.
+ * Entries are written only by an approved server-side reporting path; the dashboard
+ * exposes a scoped list query and never a write control.
+ */
+export const dailyReportHistory = mysqlTable("daily_report_history", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  reportType: varchar("reportType", { length: 100 }).notNull(),
+  sourceScope: varchar("sourceScope", { length: 255 }).notNull(),
+  summary: text("summary").notNull(),
+  status: varchar("status", { length: 32 }).default("delivered").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DailyReportHistory = typeof dailyReportHistory.$inferSelect;
+export type InsertDailyReportHistory = typeof dailyReportHistory.$inferInsert;
+
+/**
+ * Owner-managed configuration for the bounded website continuation loop.
+ * This table has no user-facing write path; the project owner creates and
+ * maintains the associated Heartbeat job through approved project controls.
+ */
+export const continuationControls = mysqlTable("continuation_controls", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  scheduleCronTaskUid: varchar("scheduleCronTaskUid", { length: 65 }),
+  isEnabled: boolean("isEnabled").default(true).notNull(),
+  maxCycles: int("maxCycles").default(2400).notNull(),
+  completedCycles: int("completedCycles").default(0).notNull(),
+  lastCycleAt: timestamp("lastCycleAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+/**
+ * Immutable, non-secret records for each website-based continuation attempt.
+ * The per-hour idempotency key prevents platform retries from consuming an
+ * additional cycle.
+ */
+export const continuationCycles = mysqlTable("continuation_cycles", {
+  id: int("id").autoincrement().primaryKey(),
+  controlId: int("controlId").notNull(),
+  idempotencyKey: varchar("idempotencyKey", { length: 64 }).notNull().unique(),
+  executionNumber: int("executionNumber").notNull(),
+  triggeredByTaskUid: varchar("triggeredByTaskUid", { length: 65 }).notNull(),
+  action: varchar("action", { length: 100 }).notNull(),
+  result: varchar("result", { length: 32 }).notNull(),
+  failureCategory: varchar("failureCategory", { length: 100 }),
+  recoveryAttempt: int("recoveryAttempt").default(0).notNull(),
+  validationStatus: varchar("validationStatus", { length: 100 }).notNull(),
+  remainingBlocker: text("remainingBlocker"),
+  nextRecommendedAction: text("nextRecommendedAction"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ContinuationControl = typeof continuationControls.$inferSelect;
+export type ContinuationCycle = typeof continuationCycles.$inferSelect;
+
+export const fbProfiles = mysqlTable("fb_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  fullName: text("fullName"),
+  profileUrl: text("profileUrl"),
+  currentBio: text("currentBio"),
+  proposedBio: text("proposedBio"),
+  targetPositioning: text("targetPositioning"),
+  avatarStatus: varchar("avatarStatus", { length: 64 }).default("needs_review"),
+  coverStatus: varchar("coverStatus", { length: 64 }).default("needs_review"),
+  privacyStatus: varchar("privacyStatus", { length: 64 }).default(
+    "review_pending"
+  ),
+  overallStatus: varchar("overallStatus", { length: 64 }).default("auditing"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const fbCertificates = mysqlTable("fb_certificates", {
+  id: int("id").autoincrement().primaryKey(),
+  profileId: int("profileId").notNull(),
+  originalTitle: text("originalTitle").notNull(),
+  translatedTitle: text("translatedTitle").notNull(),
+  sourcePlatform: varchar("sourcePlatform", { length: 64 }).default("Coursera"),
+  isRelevant: boolean("isRelevant").default(true).notNull(),
+  isDisplayed: boolean("isDisplayed").default(true).notNull(),
+  duplicateOf: text("duplicateOf"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const fbAuditSteps = mysqlTable("fb_audit_steps", {
+  id: int("id").autoincrement().primaryKey(),
+  profileId: int("profileId").notNull(),
+  stepNumber: int("stepNumber").notNull(),
+  stepTitle: varchar("stepTitle", { length: 255 }).notNull(),
+  status: varchar("status", { length: 64 }).default("pending").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const fbActionApprovals = mysqlTable("fb_action_approvals", {
+  id: int("id").autoincrement().primaryKey(),
+  profileId: int("profileId").notNull(),
+  actionType: varchar("actionType", { length: 64 }).notNull(),
+  description: text("description").notNull(),
+  proposedContent: text("proposedContent").notNull(),
+  status: varchar("status", { length: 64 })
+    .default("pending_approval")
+    .notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const fbVerifiedFacts = mysqlTable("fb_verified_facts", {
+  id: int("id").autoincrement().primaryKey(),
+  profileId: int("profileId").notNull(),
+  factCategory: varchar("factCategory", { length: 64 }).notNull(),
+  factTitle: text("factTitle").notNull(),
+  factDetails: text("factDetails").notNull(),
+  sourceDocument: text("sourceDocument"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const fbSkills = mysqlTable("fb_skills", {
+  id: int("id").autoincrement().primaryKey(),
+  profileId: int("profileId").notNull(),
+  skillName: varchar("skillName", { length: 128 }).notNull(),
+  category: varchar("category", { length: 64 }).default("Technical"),
+  isHighlighted: boolean("isHighlighted").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const fbPrivacyChecklist = mysqlTable("fb_privacy_checklist", {
+  id: int("id").autoincrement().primaryKey(),
+  profileId: int("profileId").notNull(),
+  itemTitle: text("itemTitle").notNull(),
+  description: text("description").notNull(),
+  recommendedSetting: varchar("recommendedSetting", { length: 128 }).notNull(),
+  isCompleted: boolean("isCompleted").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});

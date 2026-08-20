@@ -7,6 +7,7 @@ import { getDb } from "../db";
 import { chatAttachments, chatSessions } from "../../drizzle/schema";
 import * as chatDb from "../services/chatDb";
 import * as agentTools from "../services/agentTools";
+import * as continuationDb from "../services/continuationDb";
 import {
   decodeDocumentPayload,
   isAllowedDocument,
@@ -63,6 +64,18 @@ export const agentHubRouter = router({
         )
         .orderBy(desc(chatAttachments.createdAt));
     }),
+  getDailyReportHistory: protectedProcedure
+    .input(
+      z
+        .object({ limit: z.number().int().min(1).max(25).default(12) })
+        .optional()
+    )
+    .query(({ ctx, input }) => {
+      return chatDb.getUserDailyReports(ctx.user.id, input?.limit ?? 12);
+    }),
+  getContinuationStatus: protectedProcedure.query(() =>
+    continuationDb.getContinuationStatus()
+  ),
 
   uploadAttachment: protectedProcedure
     .input(

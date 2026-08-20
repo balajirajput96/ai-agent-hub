@@ -16,6 +16,11 @@ import {
   AlertCircle,
   Terminal,
   Activity,
+  CalendarClock,
+  Clock3,
+  HardDrive,
+  History,
+  ShieldCheck,
   RefreshCw,
   LogOut,
   Menu,
@@ -63,6 +68,20 @@ export default function ChatDashboard() {
     enabled: !!user,
     refetchInterval: 10000,
   });
+  const reportHistoryQuery = trpc.agentHub.getDailyReportHistory.useQuery(
+    undefined,
+    {
+      enabled: !!user,
+      refetchInterval: 60000,
+    }
+  );
+  const continuationQuery = trpc.agentHub.getContinuationStatus.useQuery(
+    undefined,
+    {
+      enabled: !!user,
+      refetchInterval: 60000,
+    }
+  );
 
   const messagesQuery = trpc.agentHub.getMessages.useQuery(
     { sessionId: activeSessionId! },
@@ -294,6 +313,18 @@ export default function ChatDashboard() {
             </div>
             <div className="flex items-center justify-between text-xs bg-slate-900 p-2 rounded-lg border border-slate-800">
               <div className="flex items-center gap-2">
+                <HardDrive className="w-4 h-4 text-sky-300" />
+                <span>Google Drive</span>
+              </div>
+              <Badge
+                variant="outline"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              >
+                read-only
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between text-xs bg-slate-900 p-2 rounded-lg border border-slate-800">
+              <div className="flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-violet-300" />
                 <span>Gemini CLI</span>
               </div>
@@ -349,6 +380,118 @@ export default function ChatDashboard() {
             {healthData?.huggingface.status === "authorization_required" && (
               <p className="px-1 text-[11px] leading-relaxed text-amber-300/80">
                 Authorization is required before Hugging Face inference can run.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 border-b border-slate-800 bg-slate-950/30">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+            <CalendarClock className="w-3.5 h-3.5 text-indigo-400" />
+            Daily automation
+          </h2>
+          <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium text-indigo-200">
+                GitHub + Drive summary
+              </span>
+              <Badge
+                variant="outline"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              >
+                active
+              </Badge>
+            </div>
+            <p className="mt-2 leading-relaxed text-slate-400">
+              Runs at 9:00 AM IST with read-only GitHub and Google Workspace
+              scope. It does not publish, modify repositories, or change Drive
+              files.
+            </p>
+          </div>
+          <div className="mt-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium text-cyan-100">
+                Hourly website continuation
+              </span>
+              <Badge
+                variant="outline"
+                className={
+                  continuationQuery.data?.control?.isEnabled
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    : "bg-slate-500/10 text-slate-300 border-slate-500/20"
+                }
+              >
+                {continuationQuery.isLoading
+                  ? "checking"
+                  : continuationQuery.data?.control?.isEnabled
+                    ? "ready"
+                    : "setup pending"}
+              </Badge>
+            </div>
+            {continuationQuery.data?.control ? (
+              <>
+                <p className="mt-2 leading-relaxed text-slate-400">
+                  {continuationQuery.data.control.completedCycles} of{" "}
+                  {continuationQuery.data.control.maxCycles} bounded hourly
+                  health cycles recorded. This job verifies only the website and
+                  database path; it does not modify external services.
+                </p>
+                {continuationQuery.data.cycles[0] && (
+                  <p className="mt-2 text-[11px] text-slate-500">
+                    Latest cycle:{" "}
+                    {continuationQuery.data.cycles[0].validationStatus}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="mt-2 leading-relaxed text-slate-400">
+                The hourly continuation control is being prepared. The active
+                daily GitHub and Drive summary remains separate and read-only.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 border-b border-slate-800 bg-slate-950/20">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+            <History className="w-3.5 h-3.5 text-indigo-400" />
+            Report history
+          </h2>
+          <div className="space-y-2">
+            {reportHistoryQuery.isLoading ? (
+              <p className="text-xs text-slate-500">
+                Loading private report receipts…
+              </p>
+            ) : reportHistoryQuery.data?.length ? (
+              reportHistoryQuery.data.slice(0, 4).map(report => (
+                <div
+                  key={report.id}
+                  className="rounded-lg border border-slate-800 bg-slate-900 p-2.5 text-xs"
+                >
+                  <div className="flex items-center gap-2 text-slate-200">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="truncate font-medium">
+                      {report.reportType}
+                    </span>
+                  </div>
+                  <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-slate-400">
+                    {report.summary}
+                  </p>
+                  <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-500">
+                    <Clock3 className="h-3 w-3" />
+                    {new Date(report.createdAt).toLocaleString()}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs leading-relaxed text-slate-500">
+                Report receipts will appear here after an approved reporting
+                worker records a delivered daily summary.
+              </p>
+            )}
+            {reportHistoryQuery.isError && (
+              <p className="text-xs text-rose-300">
+                Report history is temporarily unavailable.
               </p>
             )}
           </div>

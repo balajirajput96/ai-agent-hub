@@ -1,41 +1,121 @@
 {
   "schemaVersion": 1,
-  "lastAuditedAt": "2026-08-20T18:29:20+05:30",
+  "lastAuditedAt": "2026-08-20T19:42:46+00:00",
   "secretPolicy": "This inventory records capability and boundary metadata only. It never stores credential values, tokens, cookies, or private command arguments.",
   "repositories": [
     {
+      "name": "managed-ai-agent-hub",
+      "path": "/home/ubuntu/ai-agent-hub",
+      "role": "Manus-managed deployed application",
+      "classification": "working",
+      "reusableAssets": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/daily-maintenance.yml",
+        "scripts/run-maintenance.mjs",
+        "automation/CONTINUATION.md",
+        "continuous-repair-status.md",
+        "integration-status.md",
+        "reporting-access-status.md",
+        "repository-repair-status.md"
+      ]
+    },
+    {
       "name": "balajirajput96/ai-agent-hub",
+      "path": "/home/ubuntu/github-ai-agent-hub",
       "role": "GitHub-centered source repository",
       "classification": "working",
       "reusableAssets": [
         ".github/workflows/ci.yml",
-        ".github/workflows/ci-health-monitor.yml"
+        ".github/workflows/ci-health-monitor.yml",
+        ".github/workflows/daily-maintenance.yml",
+        "scripts/run-maintenance.mjs"
       ]
     }
   ],
   "automations": [
     {
       "name": "CI",
+      "owner": "GitHub repository",
       "trigger": "push, pull request, manual dispatch",
       "classification": "working",
       "purpose": "Install frozen dependencies, type-check, test, and production-build the application."
     },
     {
       "name": "CI Health Monitor",
+      "owner": "GitHub repository",
       "trigger": "every six hours and manual dispatch",
       "classification": "working",
       "purpose": "Boundedly re-run failed workflows for the current commit only."
     },
     {
       "name": "Daily Maintenance",
-      "trigger": "daily and manual dispatch",
-      "classification": "implemented",
-      "purpose": "Record deterministic repository validation results as a GitHub Actions artifact."
+      "owner": "GitHub repository",
+      "trigger": "daily at 03:15 UTC and manual dispatch",
+      "classification": "working locally; hosted runner availability externally bounded",
+      "purpose": "Run the reusable format, type, test, build, migration, audit, and diff checks and upload non-secret execution artifacts."
+    },
+    {
+      "name": "Hourly website continuation",
+      "owner": "Manus project Heartbeat",
+      "trigger": "planned hourly UTC callback, capped at 2,400 cycles",
+      "classification": "implemented; pending deployed schedule registration",
+      "purpose": "Verify cron authentication and database availability, then persist an idempotent non-secret cycle record without accessing external connectors."
+    },
+    {
+      "name": "Daily GitHub and Drive summary",
+      "owner": "Manus task schedule",
+      "trigger": "daily at 09:00 Asia/Kolkata",
+      "classification": "approved read-only",
+      "purpose": "Summarize accessible GitHub and Google Drive activity without external mutation."
     }
   ],
-  "externalBoundaries": [
-    "Gemini requires a valid provider-managed credential.",
-    "Antigravity requires the provider's interactive Google sign-in.",
-    "No Datadog project integration or CLI was discovered."
-  ]
+  "cliReadiness": [
+    {
+      "name": "git and GitHub CLI",
+      "classification": "working",
+      "boundary": "Authenticated repository access and GitHub Actions inspection are available."
+    },
+    {
+      "name": "Google Workspace CLI",
+      "classification": "working",
+      "boundary": "Read-only Drive metadata retrieval is available."
+    },
+    {
+      "name": "Gemini CLI",
+      "classification": "external authentication required",
+      "boundary": "CLI 0.55.1 is installed and the connector is enabled, but a supported connectivity check returns API_KEY_INVALID."
+    },
+    {
+      "name": "Antigravity CLI",
+      "classification": "external authentication required",
+      "boundary": "No Antigravity executable or connector configuration is available in the current session; previous provider sign-in requirements remain unbypassed."
+    },
+    {
+      "name": "Datadog CLI",
+      "classification": "not applicable",
+      "boundary": "No project integration or installed CLI was discovered."
+    }
+  ],
+  "historicalAudit": {
+    "terminalHistory": {
+      "source": "/home/ubuntu/.bash_history",
+      "classification": "available with safe metadata-only review",
+      "reuseRecommendation": "Do not replay commands automatically; continue to promote only freshly validated procedures into version-controlled scripts."
+    },
+    "gitRecovery": [
+      {
+        "repository": "managed-ai-agent-hub",
+        "reference": "aba29c97783e41ced34d99287de40dd97c95ebf8",
+        "classification": "historical autostash metadata",
+        "reuseRecommendation": "Preserve through normal Git retention; do not reset or replay without a concrete recovery need."
+      },
+      {
+        "repository": "balajirajput96/ai-agent-hub",
+        "reference": "d909edfdd372e9f73fb025740a754f4f526040a9",
+        "classification": "superseded dependency-remediation commit",
+        "reuseRecommendation": "Preserve as Git recovery metadata; equivalent validated remediation is already represented in current history."
+      }
+    ],
+    "synchronizationBoundary": "The managed WebDev repository and matching GitHub repository have distinct histories; synchronize validated files deliberately rather than rebasing unrelated roots."
+  }
 }
