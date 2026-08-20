@@ -5,21 +5,30 @@ import { join, resolve } from "node:path";
 const outputDir = resolve(
   process.env.MAINTENANCE_OUTPUT_DIR ?? "maintenance-output"
 );
+const maintenanceDatabaseUrl =
+  process.env.DATABASE_URL ?? "mysql://ci:ci@127.0.0.1:3306/maintenance_check";
 const checks = [
   ["format", "pnpm", ["exec", "prettier", "--check", "."]],
   ["typecheck", "pnpm", ["check"]],
   ["tests", "pnpm", ["test"]],
   ["build", "pnpm", ["build"]],
-  ["migration", "pnpm", ["drizzle-kit", "check"]],
+  // drizzle-kit check validates migration metadata and does not connect to MySQL.
+  // Supply a non-secret local URL when CI does not inject DATABASE_URL.
+  [
+    "migration",
+    "pnpm",
+    ["drizzle-kit", "check"],
+    { DATABASE_URL: maintenanceDatabaseUrl },
+  ],
   ["audit", "pnpm", ["audit", "--audit-level=high"]],
   ["diff", "git", ["diff", "--check"]],
 ];
 
-async function execute(name, command, args) {
+async function execute(name, command, args, extraEnv = {}) {
   const result = await new Promise(resolveResult => {
     const child = spawn(command, args, {
       cwd: process.cwd(),
-      env: process.env,
+      env: { ...process.env, ...extraEnv },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let output = "";
@@ -53,8 +62,8 @@ await rm(outputDir, { recursive: true, force: true });
 await mkdir(outputDir, { recursive: true });
 
 const results = {};
-for (const [name, command, args] of checks) {
-  results[name] = await execute(name, command, args);
+for (const [name, command, args, extraEnv] of checks) {
+  results[name] = await execute(name, command, args, extraEnv);
 }
 
 const record = {
