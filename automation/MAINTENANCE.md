@@ -21,3 +21,7 @@ The repository does not automatically commit dependency updates, edit source cod
 ## External boundaries
 
 Gemini requires a valid provider-managed credential. Antigravity requires the provider's interactive Google sign-in. Google Drive reporting remains read-only. These conditions are surfaced in the application and inventory, but the maintenance system does not attempt to bypass any provider authentication or store secrets.
+
+### Hosted-runner queue boundary
+
+At the latest verification, GitHub Actions was enabled for the repository and allowed all configured actions, but the newly dispatched CI and Daily Maintenance runs were still pending or queued before executing any job step. There are no configured self-hosted runners, so this is a GitHub-hosted runner scheduling boundary rather than a source or workflow-step failure. The same reusable command completed successfully in both local worktrees, including the full format, type, test, build, migration, audit, and diff set. The scheduled workflow remains enabled and will retain its artifact-based record once a hosted runner is allocated.
