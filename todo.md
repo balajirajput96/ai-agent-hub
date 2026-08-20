@@ -55,8 +55,15 @@
 - [x] Verify the live production DOM serves the readable authentication-heading class after asset propagation
 - [x] Audit integration readiness, release safety, and chat workflow usability for the next production stage
 - [x] Implement the highest-value safe integration and chat workflow improvements
-- [ ] Validate the next-stage improvements with local checks, accessibility review, and GitHub CI
-- [ ] Publish the next-stage improvements and confirm production health
+- [x] Validate the next-stage improvements with local checks, accessibility review, and GitHub CI
+- [x] Publish the next-stage improvements and confirm production health
 - [x] Enforce strict document payload validation before storage upload
 - [x] Surface session and message action failures directly in the chat interface
 - [x] Add clear Hugging Face authorization guidance when the connector is enabled but unavailable
+- [ ] Review the user-provided pasted content and extract concrete safe product requirements
+- [ ] Implement and validate the actionable requirements from the pasted content
+- [ ] Audit current Git state, workflows, scripts, tests, and reachable integration implementations
+- [ ] Verify project-declared GitHub, Hugging Face, Manus, Gemini, Google, Antigravity, and Datadog integration scope without introducing unconfigured services
+- [ ] Repair every concrete repository, configuration, or workflow failure discovered during the reachable-system audit
+- [ ] Complete broad practical validation across runtime, build, tests, integrations, and CI for this audit cycle
+- [ ] Restore the missing GitHub-agent integration test to the public repository and validate the complete test suite
