@@ -1,0 +1,70 @@
+import { spawn } from "node:child_process";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
+
+const outputDir = resolve(
+  process.env.MAINTENANCE_OUTPUT_DIR ?? "maintenance-output"
+);
+const checks = [
+  ["format", "pnpm", ["exec", "prettier", "--check", "."]],
+  ["typecheck", "pnpm", ["check"]],
+  ["tests", "pnpm", ["test"]],
+  ["build", "pnpm", ["build"]],
+  ["migration", "pnpm", ["drizzle-kit", "check"]],
+  ["audit", "pnpm", ["audit", "--audit-level=high"]],
+  ["diff", "git", ["diff", "--check"]],
+];
+
+async function execute(name, command, args) {
+  const result = await new Promise(resolveResult => {
+    const child = spawn(command, args, {
+      cwd: process.cwd(),
+      env: process.env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let output = "";
+    child.stdout.on("data", chunk => {
+      output += chunk;
+    });
+    child.stderr.on("data", chunk => {
+      output += chunk;
+    });
+    child.on("error", error => {
+      resolveResult({ output: `${output}${error.message}\n`, code: 1 });
+    });
+    child.on("close", code => {
+      resolveResult({ output, code: code ?? 1 });
+    });
+  });
+
+  await writeFile(join(outputDir, `${name}.log`), result.output, "utf8");
+  return result.code === 0 ? "passed" : "failed";
+}
+
+await rm(outputDir, { recursive: true, force: true });
+await mkdir(outputDir, { recursive: true });
+
+const results = {};
+for (const [name, command, args] of checks) {
+  results[name] = await execute(name, command, args);
+}
+
+const record = {
+  schemaVersion: 1,
+  timestamp: new Date().toISOString(),
+  repository: process.env.GITHUB_REPOSITORY ?? null,
+  commit: process.env.GITHUB_SHA ?? null,
+  checks: results,
+  secretValuesRecorded: false,
+  recovery:
+    "No source, credential, or external-account mutation is attempted by this maintenance command.",
+};
+
+await writeFile(
+  join(outputDir, "maintenance-record.json"),
+  `${JSON.stringify(record, null, 2)}\n`,
+  "utf8"
+);
+
+const failed = Object.values(results).some(status => status === "failed");
+process.exitCode = failed ? 1 : 0;

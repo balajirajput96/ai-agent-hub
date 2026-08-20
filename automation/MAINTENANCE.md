@@ -12,7 +12,7 @@ This repository preserves a safe, GitHub-centered maintenance loop: discover val
 
 ## Execution record
 
-Each daily maintenance run writes a `maintenance-record.json` file and uploads it as a GitHub Actions artifact. The record contains timestamps, repository and commit identity, executed checks, outcomes, and an explicitly empty secret surface. GitHub Actions run history and the artifact provide the durable execution record; this repository never commits generated run records or credentials.
+Each daily maintenance run calls `pnpm maintenance:check`, which writes a `maintenance-record.json` file and per-check logs to the ignored `maintenance-output/` directory. GitHub Actions uploads that directory as an artifact. The record contains timestamps, repository and commit identity, executed checks, outcomes, and an explicitly empty secret surface. GitHub Actions run history and the artifact provide the durable execution record; this repository never commits generated run records or credentials.
 
 ## Safe failure handling
 

@@ -34,46 +34,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run maintenance checks
-        id: checks
-        shell: bash
+        env:
+          MAINTENANCE_OUTPUT_DIR: maintenance-output
         run: |
-          set -o pipefail
-          mkdir -p maintenance-output
-          {
-            echo "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            echo "repository=$GITHUB_REPOSITORY"
-            echo "commit=$GITHUB_SHA"
-          } > maintenance-output/context.env
-
-          status=0
-          for check in \
-            "format|pnpm exec prettier --check ." \
-            "typecheck|pnpm check" \
-            "tests|pnpm test" \
-            "build|pnpm build" \
-            "migration|pnpm drizzle-kit check" \
-            "audit|pnpm audit --audit-level=high" \
-            "diff|git diff --check"; do
-            name="${check%%|*}"
-            command="${check#*|}"
-            if bash -o pipefail -c "$command" > "maintenance-output/${name}.log" 2>&1; then
-              echo "$name=passed" >> maintenance-output/context.env
-            else
-              echo "$name=failed" >> maintenance-output/context.env
-              status=1
-            fi
-          done
-
-          node -e '
-            const fs = require("node:fs");
-            const values = Object.fromEntries(fs.readFileSync("maintenance-output/context.env", "utf8").trim().split("\n").map(line => line.split(/=(.*)/s).slice(0, 2)));
-            const checks = Object.fromEntries(["format", "typecheck", "tests", "build", "migration", "audit", "diff"].map(name => [name, values[name] ?? "not_run"]));
-            const record = { schemaVersion: 1, timestamp: new Date().toISOString(), repository: values.repository, commit: values.commit, checks, secretValuesRecorded: false, recovery: "No source, credential, or external-account mutation is attempted by this workflow." };
-            fs.writeFileSync("maintenance-output/maintenance-record.json", `${JSON.stringify(record, null, 2)}\n`);
-          '
-
-          cat maintenance-output/context.env >> "$GITHUB_STEP_SUMMARY"
-          exit "$status"
+          pnpm maintenance:check
 
       - name: Upload maintenance record
         if: always()
