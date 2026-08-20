@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Terminal,
   Activity,
+  RefreshCw,
   LogOut,
   Menu,
   MessageSquare,
@@ -290,6 +291,60 @@ export default function ChatDashboard() {
               >
                 {healthData?.huggingface.status || "Checking..."}
               </Badge>
+            </div>
+            <div className="flex items-center justify-between text-xs bg-slate-900 p-2 rounded-lg border border-slate-800">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-violet-300" />
+                <span>Gemini CLI</span>
+              </div>
+              <Badge
+                variant="outline"
+                className="bg-amber-500/10 text-amber-400 border-amber-500/20"
+              >
+                auth pending
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between text-xs bg-slate-900 p-2 rounded-lg border border-slate-800">
+              <div className="flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-violet-300" />
+                <span>Antigravity CLI</span>
+              </div>
+              <Badge
+                variant="outline"
+                className="bg-amber-500/10 text-amber-400 border-amber-500/20"
+              >
+                auth pending
+              </Badge>
+            </div>
+            <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-[11px] leading-relaxed text-slate-300">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-medium text-amber-200">
+                  Connection help
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => healthQuery.refetch()}
+                  disabled={healthQuery.isFetching}
+                  className="h-7 border-amber-500/30 px-2 text-[10px] text-amber-100 hover:bg-amber-500/10"
+                >
+                  <RefreshCw
+                    className={`mr-1 h-3 w-3 ${healthQuery.isFetching ? "animate-spin" : ""}`}
+                  />
+                  Refresh status
+                </Button>
+              </div>
+              <p className="mt-2">
+                Gemini requires a valid provider-managed credential. Update it
+                only in your approved connector or secrets settings; never paste
+                a key into this app or chat.
+              </p>
+              <p className="mt-2">
+                Antigravity requires the provider’s interactive Google sign-in.
+                Complete that sign-in in its official CLI flow, then refresh
+                this status panel.
+              </p>
             </div>
             {healthData?.huggingface.status === "authorization_required" && (
               <p className="px-1 text-[11px] leading-relaxed text-amber-300/80">

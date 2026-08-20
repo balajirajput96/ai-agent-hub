@@ -30,6 +30,12 @@ describe("client loading strategy", () => {
     expect(dashboardSource).toMatch(
       /CardTitle\s+className="text-2xl font-bold tracking-tight text-white"/
     );
+    expect(dashboardSource).toContain("Refresh status");
+    expect(dashboardSource).toContain("healthQuery.refetch()");
+    expect(dashboardSource).toMatch(
+      /never paste\s+a key into this app or chat/
+    );
+    expect(dashboardSource).toContain("provider’s interactive Google sign-in");
     expect(dashboardSource).not.toContain('from "streamdown"');
     expect(markdownSource).toContain('from "streamdown"');
     expect(viteSource).toContain("manualChunks(id)");
