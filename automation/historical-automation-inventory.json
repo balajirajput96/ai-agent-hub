@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "lastAuditedAt": "2026-08-20T18:29:20+05:30",
+  "secretPolicy": "This inventory records capability and boundary metadata only. It never stores credential values, tokens, cookies, or private command arguments.",
+  "repositories": [
+    {
+      "name": "balajirajput96/ai-agent-hub",
+      "role": "GitHub-centered source repository",
+      "classification": "working",
+      "reusableAssets": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/ci-health-monitor.yml"
+      ]
+    }
+  ],
+  "automations": [
+    {
+      "name": "CI",
+      "trigger": "push, pull request, manual dispatch",
+      "classification": "working",
+      "purpose": "Install frozen dependencies, type-check, test, and production-build the application."
+    },
+    {
+      "name": "CI Health Monitor",
+      "trigger": "every six hours and manual dispatch",
+      "classification": "working",
+      "purpose": "Boundedly re-run failed workflows for the current commit only."
+    },
+    {
+      "name": "Daily Maintenance",
+      "trigger": "daily and manual dispatch",
+      "classification": "implemented",
+      "purpose": "Record deterministic repository validation results as a GitHub Actions artifact."
+    }
+  ],
+  "externalBoundaries": [
+    "Gemini requires a valid provider-managed credential.",
+    "Antigravity requires the provider's interactive Google sign-in.",
+    "No Datadog project integration or CLI was discovered."
+  ]
+}
