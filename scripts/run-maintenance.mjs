@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
@@ -41,6 +41,14 @@ async function execute(name, command, args) {
   return result.code === 0 ? "passed" : "failed";
 }
 
+function readGitValue(args) {
+  const result = spawnSync("git", args, {
+    cwd: process.cwd(),
+    encoding: "utf8",
+  });
+  return result.status === 0 ? result.stdout.trim() || null : null;
+}
+
 await rm(outputDir, { recursive: true, force: true });
 await mkdir(outputDir, { recursive: true });
 
@@ -52,8 +60,10 @@ for (const [name, command, args] of checks) {
 const record = {
   schemaVersion: 1,
   timestamp: new Date().toISOString(),
-  repository: process.env.GITHUB_REPOSITORY ?? null,
-  commit: process.env.GITHUB_SHA ?? null,
+  repository:
+    process.env.GITHUB_REPOSITORY ??
+    readGitValue(["config", "--get", "remote.origin.url"]),
+  commit: process.env.GITHUB_SHA ?? readGitValue(["rev-parse", "HEAD"]),
   checks: results,
   secretValuesRecorded: false,
   recovery:
