@@ -4,14 +4,14 @@ AI Agent Hub is a private, authenticated workspace for LLM-assisted conversation
 
 ## Included capabilities
 
-| Area | Implementation |
-| --- | --- |
-| Authentication | Manus OAuth with per-user data access checks. |
-| Agent chat | Server-side LLM calls with Markdown rendering. |
-| GitHub tools | Repository search, file access, code search, and issue creation helpers. |
-| Hugging Face | Server-side Inference API client. |
-| Documents | Private PDF, TXT, MD, CSV, and JSON upload flow with an 8 MB limit. |
-| Persistence | Database-backed sessions, messages, attachments, and tool logs. |
+| Area           | Implementation                                                           |
+| -------------- | ------------------------------------------------------------------------ |
+| Authentication | Manus OAuth with per-user data access checks.                            |
+| Agent chat     | Server-side LLM calls with Markdown rendering.                           |
+| GitHub tools   | Repository search, file access, code search, and issue creation helpers. |
+| Hugging Face   | Server-side Inference API client.                                        |
+| Documents      | Private PDF, TXT, MD, CSV, and JSON upload flow with an 8 MB limit.      |
+| Persistence    | Database-backed sessions, messages, attachments, and tool logs.          |
 
 ## Local development
 

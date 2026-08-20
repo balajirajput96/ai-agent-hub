@@ -20,14 +20,25 @@ describe("checkIntegrationsHealth", () => {
     process.env.HF_TOKEN = "";
     const fetchMock = vi.fn(async (input: string | URL) => {
       const url = String(input);
-      if (url.includes("huggingface.co")) return new Response("{}", { status: 401 });
-      return new Response(JSON.stringify({ login: "test-user" }), { status: 200 });
+      if (url.includes("huggingface.co"))
+        return new Response("{}", { status: 401 });
+      return new Response(JSON.stringify({ login: "test-user" }), {
+        status: 200,
+      });
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
     const health = await checkIntegrationsHealth();
 
-    expect(health.github).toEqual({ status: "connected", tokenConfigured: true });
-    expect(fetchMock).toHaveBeenCalledWith("https://api.github.com/rate_limit", expect.objectContaining({ headers: expect.objectContaining({ Authorization: "token test-token" }) }));
+    expect(health.github).toEqual({
+      status: "connected",
+      tokenConfigured: true,
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.github.com/rate_limit",
+      expect.objectContaining({
+        headers: expect.objectContaining({ Authorization: "token test-token" }),
+      })
+    );
   });
 });

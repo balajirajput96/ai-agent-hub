@@ -29,7 +29,10 @@ import { appRouter } from "./routers";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
-function createTestContext(userId = 1, openId = "test-oauth-user"): TrpcContext {
+function createTestContext(
+  userId = 1,
+  openId = "test-oauth-user"
+): TrpcContext {
   const user: AuthenticatedUser = {
     id: userId,
     openId,
@@ -78,7 +81,9 @@ describe("AI Agent Hub router", () => {
   });
 
   it("reports integration health without requiring network access", async () => {
-    const health = await appRouter.createCaller(createTestContext()).agentHub.checkHealth();
+    const health = await appRouter
+      .createCaller(createTestContext())
+      .agentHub.checkHealth();
 
     expect(health.github.status).toBe("connected");
     expect(health.huggingface.status).toBe("authorization_required");
@@ -86,11 +91,17 @@ describe("AI Agent Hub router", () => {
 
   it("keeps sessions, messages, and tool logs scoped to the authenticated user", async () => {
     const caller = appRouter.createCaller(createTestContext());
-    const created = await caller.agentHub.createSession({ title: session.title });
+    const created = await caller.agentHub.createSession({
+      title: session.title,
+    });
 
     expect(created).toMatchObject({ id: session.id, userId: 1 });
-    await expect(caller.agentHub.getMessages({ sessionId: session.id })).resolves.toEqual([]);
-    await expect(caller.agentHub.getToolLogs({ sessionId: session.id })).resolves.toEqual([]);
+    await expect(
+      caller.agentHub.getMessages({ sessionId: session.id })
+    ).resolves.toEqual([]);
+    await expect(
+      caller.agentHub.getToolLogs({ sessionId: session.id })
+    ).resolves.toEqual([]);
     expect(mocks.getUserSessions).not.toHaveBeenCalled();
   });
 });

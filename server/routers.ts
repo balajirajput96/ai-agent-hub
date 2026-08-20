@@ -5,7 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import { agentHubRouter } from "./routers/agentHub";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
+  // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   agentHub: agentHubRouter,
   auth: router({
@@ -18,7 +18,6 @@ export const appRouter = router({
       } as const;
     }),
   }),
-
 });
 
 export type AppRouter = typeof appRouter;
