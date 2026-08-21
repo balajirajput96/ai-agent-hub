@@ -68,8 +68,8 @@
       "name": "Daily GitHub and Drive summary",
       "owner": "Manus task schedule",
       "trigger": "daily at 09:00 Asia/Kolkata",
-      "classification": "approved read-only",
-      "purpose": "Summarize accessible GitHub and Google Drive activity without external mutation."
+      "classification": "not verifiable from the current task context",
+      "purpose": "A prior task-local read-only summary schedule was documented, but the current task's supported schedule-status query returned no schedule. It was not recreated or changed because task-local schedules cannot be reconciled across task contexts."
     }
   ],
   "cliReadiness": [
@@ -81,7 +81,7 @@
     {
       "name": "Google Workspace CLI",
       "classification": "working",
-      "boundary": "Read-only Drive metadata retrieval is available."
+      "boundary": "A bounded read-only Drive metadata listing succeeded; no Drive mutation was performed."
     },
     {
       "name": "Hugging Face API",
@@ -90,25 +90,44 @@
     },
     {
       "name": "Gemini CLI",
-      "classification": "external authentication required",
-      "boundary": "CLI 0.55.1 is installed and its supported trusted-workspace connectivity check returns API_KEY_INVALID; provider-managed credential renewal is required."
+      "classification": "unavailable in the current session",
+      "boundary": "No executable is currently present, so provider authentication was not attempted or bypassed."
     },
     {
       "name": "Antigravity CLI",
-      "classification": "external authentication required",
-      "boundary": "No Antigravity executable or connector configuration is available in the current session; previous provider sign-in requirements remain unbypassed."
+      "classification": "unavailable in the current session",
+      "boundary": "No Antigravity executable is present; Jules, gcloud, AWS, and Datadog CLIs are also unavailable and no provider authentication was bypassed."
     },
     {
       "name": "Datadog CLI",
       "classification": "not applicable",
       "boundary": "No project integration or installed CLI was discovered."
+    },
+    {
+      "name": "n8n automation integration",
+      "classification": "configuration attention",
+      "boundary": "The configured MCP endpoint returned a legacy-SSE initialization error and the configured read-only REST workflow listing returned HTTP 404; no n8n workflow was changed."
     }
   ],
+  "enabledConnectorScope": {
+    "verifiedProjectRelevant": [
+      "GitHub: authenticated CLI and GitHub Actions inspection succeeded",
+      "Google Workspace: bounded read-only Drive metadata listing succeeded",
+      "Hugging Face: read-only identity check returned HTTP 401 and remains provider-authentication-bound",
+      "n8n: both configured read-only integration paths require configuration repair before use"
+    ],
+    "intentionallyNotInvoked": "Other enabled account-level connectors, including deployment, marketing, CMS, email, calendar, browser, and third-party data services, are not referenced by the AI Agent Hub code or its bounded maintenance workflow. They were not invoked to avoid unrelated account reads or mutations."
+  },
   "historicalAudit": {
     "terminalHistory": {
       "source": "/home/ubuntu/.bash_history",
-      "classification": "available with safe metadata-only review",
-      "reuseRecommendation": "Do not replay commands automatically; continue to promote only freshly validated procedures into version-controlled scripts."
+      "classification": "unavailable in the current session",
+      "reuseRecommendation": "Do not infer or replay historical commands. Continue to promote only freshly validated procedures into version-controlled scripts."
+    },
+    "runtimeLogs": {
+      "source": ".manus-logs/, local maintenance-output/, and retained GitHub Actions artifacts",
+      "classification": "available with bounded metadata and error-summary review",
+      "reuseRecommendation": "Inspect logs non-destructively; preserve GitHub maintenance artifacts as the durable source for hosted execution evidence."
     },
     "gitRecovery": [
       {
