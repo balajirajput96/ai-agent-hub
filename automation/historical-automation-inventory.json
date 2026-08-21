@@ -1,7 +1,13 @@
 {
   "schemaVersion": 1,
-  "lastAuditedAt": "2026-08-21T21:57:06+00:00",
+  "lastAuditedAt": "2026-08-21T23:25:53Z",
   "secretPolicy": "This inventory records capability and boundary metadata only. It never stores credential values, tokens, cookies, or private command arguments.",
+  "preservationSnapshot": {
+    "createdAt": "2026-08-21T23:18:23Z",
+    "path": "/home/ubuntu/github-repair/state-snapshots/20260821T231823Z",
+    "classification": "locally preserved, redacted engineering-state snapshot",
+    "contents": "Six accessible Git worktree reports, eleven non-secret repair artifacts, and a generated artifact manifest; no shell-history file was present to preserve."
+  },
   "repositories": [
     {
       "name": "managed-ai-agent-hub",
@@ -31,6 +37,17 @@
         ".github/workflows/daily-maintenance.yml",
         "scripts/maintenanceIdentity.mjs",
         "scripts/run-maintenance.mjs"
+      ]
+    },
+    {
+      "name": "workspace-repair-audit",
+      "path": "/home/ubuntu/github-repair",
+      "role": "Preserved local repair workspace and redacted environment-audit source",
+      "classification": "working; integrated through a non-secret snapshot reference",
+      "reusableAssets": [
+        "scripts/preserve_environment_state.sh",
+        "github-repair-audit.md",
+        "state-snapshots/20260821T231823Z/artifact_manifest.tsv"
       ]
     }
   ],
@@ -68,8 +85,15 @@
       "name": "Daily GitHub and Drive summary",
       "owner": "Manus task schedule",
       "trigger": "daily at 09:00 Asia/Kolkata",
-      "classification": "not verifiable from the current task context",
-      "purpose": "A prior task-local read-only summary schedule was documented, but the current task's supported schedule-status query returned no schedule. It was not recreated or changed because task-local schedules cannot be reconciled across task contexts."
+      "classification": "historical task-local schedule; not present in the current task schedule inventory",
+      "purpose": "A prior read-only summary schedule remains preserved as a historical automation record and is not modified by this maintenance system."
+    },
+    {
+      "name": "Daily Engineering Maintenance Report",
+      "owner": "Manus task schedule",
+      "trigger": "daily at 09:00 Asia/Kolkata",
+      "classification": "active; created and verified in the current task",
+      "purpose": "Loads persisted engineering-maintenance state, inspects the latest GitHub Actions outcomes and continuation evidence, and reports validated repair priorities without bypassing credentials or performing unsafe account mutations."
     }
   ],
   "cliReadiness": [
@@ -87,6 +111,11 @@
       "name": "Hugging Face API",
       "classification": "external authentication required",
       "boundary": "A supported read-only whoami request returned HTTP 401; provider-managed credential renewal is required."
+    },
+    {
+      "name": "Google Gemini API",
+      "classification": "working",
+      "boundary": "A read-only models endpoint probe returned HTTP 200 through the enabled provider connection; no provider content or account data was changed."
     },
     {
       "name": "Gemini CLI",
@@ -113,6 +142,7 @@
     "verifiedProjectRelevant": [
       "GitHub: authenticated CLI and GitHub Actions inspection succeeded",
       "Google Workspace: bounded read-only Drive metadata listing succeeded",
+      "Google Gemini: enabled provider connection passed a read-only models health probe",
       "Hugging Face: read-only identity check returned HTTP 401 and remains provider-authentication-bound",
       "n8n: both configured read-only integration paths require configuration repair before use"
     ],
