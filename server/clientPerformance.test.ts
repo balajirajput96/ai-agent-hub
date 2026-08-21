@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const projectRoot = path.resolve(import.meta.dirname, "..");
 
 describe("client loading strategy", () => {
-  it("defers markdown parsing from the primary route", async () => {
+  it("defers markdown parsing and the secondary workspace from the primary route", async () => {
     const [appSource, dashboardSource, markdownSource, viteSource] =
       await Promise.all([
         readFile(path.join(projectRoot, "client/src/App.tsx"), "utf8"),
@@ -20,7 +20,9 @@ describe("client loading strategy", () => {
         readFile(path.join(projectRoot, "vite.config.ts"), "utf8"),
       ]);
 
-    expect(appSource).not.toContain("FacebookProfileWorkspace");
+    expect(appSource).toMatch(
+      /lazy\(\s*\(\)\s*=>\s*import\("\.\/pages\/FacebookProfileWorkspace"\)\s*\)/
+    );
     expect(dashboardSource).toMatch(
       /lazy\(\s*\(\)\s*=>\s*import\("@\/components\/MarkdownContent"\)\s*\)/
     );
@@ -36,6 +38,9 @@ describe("client loading strategy", () => {
       /never paste\s+a key into this app or chat/
     );
     expect(dashboardSource).toContain("provider’s interactive Google sign-in");
+    expect(dashboardSource).toContain("Hourly continuation history");
+    expect(dashboardSource).toContain("Refresh continuation");
+    expect(dashboardSource).toContain("Cycle limit reached");
     expect(dashboardSource).not.toContain('from "streamdown"');
     expect(markdownSource).toContain('from "streamdown"');
     expect(viteSource).toContain("manualChunks(id)");

@@ -231,6 +231,19 @@ export default function ChatDashboard() {
   };
 
   const healthData = healthQuery.data;
+  const continuationControl = continuationQuery.data?.control;
+  const continuationCycles = continuationQuery.data?.cycles ?? [];
+  const remainingContinuationCycles = continuationControl
+    ? Math.max(
+        continuationControl.maxCycles - continuationControl.completedCycles,
+        0
+      )
+    : null;
+  const isContinuationLimitReached = remainingContinuationCycles === 0;
+  const isContinuationLimitNear =
+    remainingContinuationCycles !== null &&
+    remainingContinuationCycles > 0 &&
+    remainingContinuationCycles <= 24;
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-950 text-slate-100 md:flex">
@@ -416,32 +429,99 @@ export default function ChatDashboard() {
               <Badge
                 variant="outline"
                 className={
-                  continuationQuery.data?.control?.isEnabled
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                    : "bg-slate-500/10 text-slate-300 border-slate-500/20"
+                  isContinuationLimitReached
+                    ? "bg-rose-500/10 text-rose-300 border-rose-500/20"
+                    : isContinuationLimitNear
+                      ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                      : continuationControl?.isEnabled
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : "bg-slate-500/10 text-slate-300 border-slate-500/20"
                 }
               >
                 {continuationQuery.isLoading
                   ? "checking"
-                  : continuationQuery.data?.control?.isEnabled
-                    ? "ready"
-                    : "setup pending"}
+                  : isContinuationLimitReached
+                    ? "limit reached"
+                    : isContinuationLimitNear
+                      ? "limit near"
+                      : continuationControl?.isEnabled
+                        ? "ready"
+                        : "setup pending"}
               </Badge>
             </div>
-            {continuationQuery.data?.control ? (
+            {continuationControl ? (
               <>
                 <p className="mt-2 leading-relaxed text-slate-400">
-                  {continuationQuery.data.control.completedCycles} of{" "}
-                  {continuationQuery.data.control.maxCycles} bounded hourly
-                  health cycles recorded. This job verifies only the website and
-                  database path; it does not modify external services.
+                  {continuationControl.completedCycles} of{" "}
+                  {continuationControl.maxCycles} bounded hourly health cycles
+                  recorded. {remainingContinuationCycles} remain. This job
+                  verifies only the website and database path; it does not
+                  modify external services.
                 </p>
-                {continuationQuery.data.cycles[0] && (
-                  <p className="mt-2 text-[11px] text-slate-500">
-                    Latest cycle:{" "}
-                    {continuationQuery.data.cycles[0].validationStatus}
-                  </p>
+                <div
+                  className={`mt-2 rounded-lg border p-2 text-[11px] leading-relaxed ${
+                    isContinuationLimitReached
+                      ? "border-rose-500/20 bg-rose-500/5 text-rose-200"
+                      : isContinuationLimitNear
+                        ? "border-amber-500/20 bg-amber-500/5 text-amber-100"
+                        : "border-slate-700 bg-slate-950/50 text-slate-400"
+                  }`}
+                  role="status"
+                >
+                  {isContinuationLimitReached
+                    ? "Cycle limit reached. Pause or replace the approved Heartbeat before more work is scheduled; the daily GitHub and Drive summary remains separate."
+                    : isContinuationLimitNear
+                      ? `Only ${remainingContinuationCycles} cycles remain. Review the continuation control before the configured cap is reached.`
+                      : "The hourly continuation runs independently from the daily read-only GitHub and Drive summary."}
+                </div>
+                {continuationCycles.length > 0 && (
+                  <details className="mt-3 rounded-lg border border-cyan-500/15 bg-slate-950/40 p-2 text-[11px]">
+                    <summary className="cursor-pointer font-medium text-cyan-100">
+                      Hourly continuation history ({continuationCycles.length})
+                    </summary>
+                    <div className="mt-2 overflow-x-auto">
+                      <table className="w-full min-w-[320px] text-left text-[10px]">
+                        <thead className="text-slate-500">
+                          <tr>
+                            <th className="pb-1 pr-2 font-medium">Time</th>
+                            <th className="pb-1 pr-2 font-medium">
+                              Validation
+                            </th>
+                            <th className="pb-1 font-medium">Next action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800 text-slate-300">
+                          {continuationCycles.map(cycle => (
+                            <tr key={cycle.id}>
+                              <td className="py-1.5 pr-2 align-top whitespace-nowrap text-slate-400">
+                                {new Date(cycle.createdAt).toLocaleString()}
+                              </td>
+                              <td className="py-1.5 pr-2 align-top break-words">
+                                {cycle.validationStatus}
+                              </td>
+                              <td className="py-1.5 align-top break-words text-slate-400">
+                                {cycle.nextRecommendedAction}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </details>
                 )}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => continuationQuery.refetch()}
+                  disabled={continuationQuery.isFetching}
+                  className="mt-3 h-7 border-cyan-500/30 px-2 text-[10px] text-cyan-100 hover:bg-cyan-500/10"
+                >
+                  <RefreshCw
+                    className={`mr-1 h-3 w-3 ${continuationQuery.isFetching ? "animate-spin" : ""}`}
+                  />
+                  Refresh continuation
+                </Button>
               </>
             ) : (
               <p className="mt-2 leading-relaxed text-slate-400">
