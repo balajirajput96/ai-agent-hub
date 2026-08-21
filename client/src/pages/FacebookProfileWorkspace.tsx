@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { CLIPBOARD_FALLBACK_MESSAGE } from "@/lib/facebookProfileFeedback";
 import { trpc } from "@/lib/trpc";
 import {
   CheckCircle2,
@@ -22,6 +23,8 @@ export default function FacebookProfileWorkspace() {
   });
   const [skill, setSkill] = useState({ name: "", category: "Technical" });
   const [copied, setCopied] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState("");
+  const [showExportFallback, setShowExportFallback] = useState(false);
   const utils = trpc.useUtils();
   const query = trpc.facebookProfile.getProfile.useQuery(undefined);
   const data = query.data;
@@ -32,24 +35,34 @@ export default function FacebookProfileWorkspace() {
   const approvedActions = hasEvidence
     ? (data?.actions.filter(item => item.status === "approved") ?? [])
     : [];
-  const refresh = () => utils.facebookProfile.getProfile.invalidate();
+  const refresh = () => {
+    setWorkspaceError("");
+    return utils.facebookProfile.getProfile.invalidate();
+  };
+  const reportWorkspaceError = (error: { message: string }) =>
+    setWorkspaceError(error.message);
   const hasPendingBioApproval = pendingActions.some(
     item => item.actionType === "bio_update"
   );
   const saveBio = trpc.facebookProfile.updateBio.useMutation({
     onSuccess: refresh,
+    onError: reportWorkspaceError,
   });
   const requestApproval = trpc.facebookProfile.requestBioApproval.useMutation({
     onSuccess: refresh,
+    onError: reportWorkspaceError,
   });
   const approve = trpc.facebookProfile.approveAction.useMutation({
     onSuccess: refresh,
+    onError: reportWorkspaceError,
   });
   const addFact = trpc.facebookProfile.addVerifiedFact.useMutation({
     onSuccess: refresh,
+    onError: reportWorkspaceError,
   });
   const addSkill = trpc.facebookProfile.addSkill.useMutation({
     onSuccess: refresh,
+    onError: reportWorkspaceError,
   });
   const visibleBio =
     bio || (hasEvidence ? data?.profile.proposedBio || "" : "");
@@ -127,6 +140,15 @@ export default function FacebookProfileWorkspace() {
           </p>
         </div>
       </div>
+
+      {workspaceError && (
+        <div
+          className="border-b border-rose-400/20 bg-rose-400/10 px-5 py-3 text-sm text-rose-100"
+          role="alert"
+        >
+          <p className="mx-auto max-w-6xl">{workspaceError}</p>
+        </div>
+      )}
 
       <div className="mx-auto grid max-w-6xl gap-6 px-5 py-7 lg:grid-cols-2">
         <section className="rounded-2xl border border-white/10 bg-slate-900 p-6">
@@ -365,9 +387,16 @@ export default function FacebookProfileWorkspace() {
           <Button
             className="mt-6 bg-cyan-400 text-slate-950 hover:bg-cyan-300"
             onClick={async () => {
-              await navigator.clipboard.writeText(exportText);
-              setCopied(true);
-              window.setTimeout(() => setCopied(false), 1600);
+              try {
+                await navigator.clipboard.writeText(exportText);
+                setWorkspaceError("");
+                setShowExportFallback(false);
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 1600);
+              } catch {
+                setWorkspaceError(CLIPBOARD_FALLBACK_MESSAGE);
+                setShowExportFallback(true);
+              }
             }}
           >
             {copied ? (
@@ -382,6 +411,19 @@ export default function FacebookProfileWorkspace() {
               </>
             )}
           </Button>
+          {showExportFallback && (
+            <div className="mt-4">
+              <p className="mb-2 text-xs text-slate-400">
+                Manual-copy fallback
+              </p>
+              <Textarea
+                aria-label="Reviewed Facebook profile export"
+                className="min-h-48 bg-slate-950 text-xs"
+                readOnly
+                value={exportText}
+              />
+            </div>
+          )}
         </section>
       </div>
     </main>
