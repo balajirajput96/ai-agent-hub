@@ -58,8 +58,9 @@
       "name": "Hourly website continuation",
       "owner": "Manus project Heartbeat",
       "trigger": "planned hourly UTC callback, capped at 2,400 cycles",
-      "classification": "implemented; pending deployed schedule registration",
-      "purpose": "Verify cron authentication and database availability, then persist an idempotent non-secret cycle record without accessing external connectors."
+      "classification": "active; authorized production callbacks verified",
+      "purpose": "Verify cron authentication and database availability, then persist an idempotent non-secret cycle record without accessing external connectors.",
+      "evidence": "The project-owned Heartbeat is enabled at 0 0 * * * * UTC. Its first four authorized callbacks returned HTTP 200 and recorded database-probe, schedule-ownership, and cycle-limit validation results."
     },
     {
       "name": "Daily GitHub and Drive summary",

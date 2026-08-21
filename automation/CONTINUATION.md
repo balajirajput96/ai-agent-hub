@@ -13,3 +13,11 @@ The `/api/scheduled/hourly-continuation` handler accepts only a platform-authent
 ## Lifecycle
 
 The project-level schedule uses a six-field hourly UTC cron expression and is created only after the deployed handler is available. Its returned task identity is stored in `continuation_controls`. At 2,400 completed cycles, the handler stops recording new work and returns a safe limit response. The control can later be paused through the approved project schedule lifecycle without altering the daily report schedule.
+
+## Owner-only bootstrap
+
+After a project owner creates or replaces the Heartbeat schedule, an authenticated administrator can call the `agentHub.bootstrapContinuationControl` mutation with the returned task identity. The mutation validates the bounded non-secret identifier and idempotently creates or updates the sole control row. It does not create schedules, accept connector credentials, expose scheduler data to non-administrators, or reset existing cycle counts.
+
+## Verified production state
+
+The enabled project-owned Heartbeat runs at `0 0 * * * *` UTC. Its first four authorized production callbacks returned HTTP 200 and wrote distinct UTC-hour records with the database probe, schedule ownership, and cycle-limit validation fields. The existing `Daily GitHub and Drive summary` remains active at 09:00 Asia/Calcutta with its established read-only instruction; the website continuation handler neither invokes nor modifies that task-level schedule.

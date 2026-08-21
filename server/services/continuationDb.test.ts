@@ -3,6 +3,7 @@ import {
   buildContinuationValidation,
   decideContinuation,
   getHourlyIdempotencyKey,
+  isValidHeartbeatTaskUid,
 } from "./continuationDb";
 
 describe("hourly continuation decisions", () => {
@@ -38,5 +39,11 @@ describe("hourly continuation decisions", () => {
     expect(
       buildContinuationValidation(2400, 2400).nextRecommendedAction
     ).toContain("Pause");
+  });
+
+  it("accepts only bounded non-secret Heartbeat task identities", () => {
+    expect(isValidHeartbeatTaskUid("bh5jRHZ5ZcqgSaCtVr8uax")).toBe(true);
+    expect(isValidHeartbeatTaskUid("too short")).toBe(false);
+    expect(isValidHeartbeatTaskUid("task uid with spaces")).toBe(false);
   });
 });

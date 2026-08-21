@@ -17,6 +17,46 @@ export function getHourlyIdempotencyKey(date = new Date()) {
   return `hourly-continuation:${hour.toISOString()}`;
 }
 
+export function isValidHeartbeatTaskUid(taskUid: string) {
+  return /^[A-Za-z0-9_-]{8,65}$/.test(taskUid);
+}
+
+export async function bootstrapContinuationControl(taskUid: string) {
+  if (!isValidHeartbeatTaskUid(taskUid)) {
+    throw new Error("Invalid Heartbeat task identity");
+  }
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [existing] = await db
+    .select()
+    .from(continuationControls)
+    .where(eq(continuationControls.name, CONTINUATION_CONTROL_NAME))
+    .limit(1);
+
+  if (existing) {
+    await db
+      .update(continuationControls)
+      .set({ scheduleCronTaskUid: taskUid })
+      .where(eq(continuationControls.id, existing.id));
+  } else {
+    await db.insert(continuationControls).values({
+      name: CONTINUATION_CONTROL_NAME,
+      scheduleCronTaskUid: taskUid,
+      isEnabled: true,
+      maxCycles: 2400,
+      completedCycles: 0,
+    });
+  }
+
+  const [control] = await db
+    .select()
+    .from(continuationControls)
+    .where(eq(continuationControls.name, CONTINUATION_CONTROL_NAME))
+    .limit(1);
+  if (!control) throw new Error("Continuation control bootstrap failed");
+  return control;
+}
+
 export function decideContinuation(
   control: {
     isEnabled: boolean;

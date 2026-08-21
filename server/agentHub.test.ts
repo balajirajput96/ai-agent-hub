@@ -1,12 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("./services/agentTools", () => ({
-  checkIntegrationsHealth: vi.fn(async () => ({
-    github: { status: "connected", tokenConfigured: false },
-    huggingface: { status: "optional", tokenConfigured: false },
-  })),
-}));
-
+import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
@@ -47,5 +39,15 @@ describe("AI Agent Hub Router Tests", () => {
     expect(health).toHaveProperty("huggingface");
     expect(health.github).toHaveProperty("status");
     expect(health.huggingface).toHaveProperty("status");
+  });
+
+  it("prevents non-admin users from bootstrapping continuation controls", async () => {
+    const caller = appRouter.createCaller(createTestContext());
+
+    await expect(
+      caller.agentHub.bootstrapContinuationControl({
+        taskUid: "bh5jRHZ5ZcqgSaCtVr8uax",
+      })
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

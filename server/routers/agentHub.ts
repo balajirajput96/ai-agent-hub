@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { and, desc, eq } from "drizzle-orm";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { storageGetSignedUrl, storagePut } from "../storage";
 import { getDb } from "../db";
@@ -76,6 +76,15 @@ export const agentHubRouter = router({
   getContinuationStatus: protectedProcedure.query(() =>
     continuationDb.getContinuationStatus()
   ),
+  bootstrapContinuationControl: adminProcedure
+    .input(
+      z.object({
+        taskUid: z.string().regex(/^[A-Za-z0-9_-]{8,65}$/),
+      })
+    )
+    .mutation(({ input }) =>
+      continuationDb.bootstrapContinuationControl(input.taskUid)
+    ),
 
   uploadAttachment: protectedProcedure
     .input(
