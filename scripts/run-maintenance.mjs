@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { getMigrationCheckStatus } from "./maintenanceDatabaseCheck.mjs";
 import { getSafeRepositoryIdentity } from "./maintenanceIdentity.mjs";
 
 const outputDir = resolve(
@@ -16,7 +17,6 @@ const checks = [
   ["typecheck", "pnpm", ["check"]],
   ["tests", "pnpm", ["test"]],
   ["build", "pnpm", ["build"]],
-  ["migration", "pnpm", ["drizzle-kit", "check"]],
   ["audit", "pnpm", ["audit", "--audit-level=high"]],
   ["diff", "git", ["diff", "--check"]],
 ];
@@ -62,6 +62,9 @@ const results = {};
 for (const [name, command, args] of checks) {
   results[name] = await execute(name, command, args);
 }
+results.migration =
+  getMigrationCheckStatus(process.env) ??
+  (await execute("migration", "pnpm", ["drizzle-kit", "check"]));
 
 const record = {
   schemaVersion: 1,
