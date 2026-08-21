@@ -41,7 +41,7 @@ jobs:
 
       - name: Upload maintenance record
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: daily-maintenance-${{ github.run_id }}
           path: maintenance-output
