@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastAuditedAt": "2026-08-21T07:10:17+00:00",
+  "lastAuditedAt": "2026-08-21T07:31:31+00:00",
   "secretPolicy": "This inventory records capability and boundary metadata only. It never stores credential values, tokens, cookies, or private command arguments.",
   "repositories": [
     {
@@ -80,6 +80,11 @@
       "name": "Google Workspace CLI",
       "classification": "working",
       "boundary": "Read-only Drive metadata retrieval is available."
+    },
+    {
+      "name": "Hugging Face API",
+      "classification": "external authentication required",
+      "boundary": "A supported read-only whoami request returned HTTP 401; provider-managed credential renewal is required."
     },
     {
       "name": "Gemini CLI",
