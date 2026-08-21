@@ -14,7 +14,7 @@ This project preserves a safe, GitHub-centered maintenance loop: discover valida
 
 ## Execution record
 
-Each daily maintenance run calls `pnpm maintenance:check`, which first validates `automation/historical-automation-inventory.json` and then writes a `maintenance-record.json` file plus per-check logs to the ignored `maintenance-output/` directory. GitHub Actions uploads that directory for 100 days, matching the 2,400-hour continuation horizon. The record contains timestamps, repository and commit identity, executed checks, outcomes, and an explicitly empty secret surface. GitHub Actions run history and the artifact provide the durable execution record; this repository never commits generated run records or credentials.
+Each daily maintenance run calls `pnpm maintenance:check`, which first validates `automation/historical-automation-inventory.json` and then writes a `maintenance-record.json` file plus per-check logs to the ignored `maintenance-output/` directory. GitHub Actions uploads that directory for 100 days, matching the 2,400-hour continuation horizon. The record contains timestamps, a sanitized repository identity, commit identity, executed checks, outcomes, and an explicitly empty secret surface. If the GitHub repository identifier is unavailable or malformed, `scripts/maintenanceIdentity.mjs` records only `local:<directory-name>` rather than reading a managed remote URL. GitHub Actions run history and the artifact provide the durable execution record; this repository never commits generated run records or credentials.
 
 ## Safe failure handling
 
