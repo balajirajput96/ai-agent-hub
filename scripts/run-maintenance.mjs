@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { getSafeRepositoryIdentity } from "./maintenanceIdentity.mjs";
 
 const outputDir = resolve(
   process.env.MAINTENANCE_OUTPUT_DIR ?? "maintenance-output"
@@ -65,9 +66,7 @@ for (const [name, command, args] of checks) {
 const record = {
   schemaVersion: 1,
   timestamp: new Date().toISOString(),
-  repository:
-    process.env.GITHUB_REPOSITORY ??
-    readGitValue(["config", "--get", "remote.origin.url"]),
+  repository: getSafeRepositoryIdentity(process.env, process.cwd()),
   commit: process.env.GITHUB_SHA ?? readGitValue(["rev-parse", "HEAD"]),
   checks: results,
   secretValuesRecorded: false,
