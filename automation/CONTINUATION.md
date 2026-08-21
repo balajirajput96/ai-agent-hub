@@ -8,7 +8,7 @@ The project’s hourly continuation is a **bounded website health job**, selecte
 
 ## Safe execution
 
-The `/api/scheduled/hourly-continuation` handler accepts only a platform-authenticated cron identity. It verifies that the incoming task owns the configured control, declines disabled or exhausted controls, executes a database `SELECT 1` probe, and writes at most one cycle per UTC hour. Platform retries receive a successful, explicit duplicate response instead of incrementing the count again. Each record derives its validation result and next action from the actual schedule ownership, database probe, and cycle boundary. The handler does not run shell commands, store credentials, call external connectors, modify GitHub, or change Google Drive.
+The `/api/scheduled/hourly-continuation` handler accepts only a platform-authenticated cron identity. It verifies that the incoming task owns the configured control, declines disabled or exhausted controls, executes a database `SELECT 1` probe, and writes at most one cycle per UTC hour. Platform retries receive a successful, explicit duplicate response instead of incrementing the count again. Each record derives its validation result and next action from the actual schedule ownership, database probe, cycle boundary, and one bounded server-side read-only inspection of the latest GitHub Actions workflow. The GitHub check is recorded as passed, attention, or unavailable; it never modifies repositories, workflows, Drive data, or provider credentials.
 
 ## Lifecycle
 

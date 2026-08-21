@@ -30,15 +30,29 @@ describe("hourly continuation decisions", () => {
   });
 
   it("records a bounded, dynamic validation outcome", () => {
-    expect(buildContinuationValidation(1, 2400)).toEqual({
-      validationStatus:
-        "database-probe-passed,schedule-ownership-passed,cycle-1-within-2400-limit",
-      nextRecommendedAction:
-        "Wait for the next scheduled hourly website health check.",
-    });
+    const validation = buildContinuationValidation(1, 2400);
+    expect(validation.validationStatus).toContain("database-probe-passed");
+    expect(validation.validationStatus).toContain(
+      "github-workflow-unavailable"
+    );
+    expect(validation.remainingBlocker).toContain("not configured");
+    expect(validation.nextRecommendedAction).toContain("Keep local");
     expect(
       buildContinuationValidation(2400, 2400).nextRecommendedAction
     ).toContain("Pause");
+  });
+
+  it("records a bounded GitHub workflow status in the validation result", () => {
+    const validation = buildContinuationValidation(8, 2400, {
+      status: "attention",
+      validationToken: "github-workflow-attention",
+      blocker: "GitHub run 42 is failure.",
+      recommendation: "Review the latest GitHub workflow outcome.",
+    });
+
+    expect(validation.validationStatus).toContain("github-workflow-attention");
+    expect(validation.remainingBlocker).toBe("GitHub run 42 is failure.");
+    expect(validation.nextRecommendedAction).toContain("Review");
   });
 
   it("accepts only bounded non-secret Heartbeat task identities", () => {

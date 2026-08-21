@@ -1,6 +1,10 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { continuationControls, continuationCycles } from "../../drizzle/schema";
 import { getDb } from "../db";
+import {
+  inspectGitHubWorkflowHealth,
+  type GitHubWorkflowHealth,
+} from "./githubWorkflowHealth";
 
 export const CONTINUATION_CONTROL_NAME = "hourly-engineering-continuation";
 
@@ -78,18 +82,28 @@ export function decideContinuation(
 
 export function buildContinuationValidation(
   executionNumber: number,
-  maxCycles: number
+  maxCycles: number,
+  githubWorkflow: GitHubWorkflowHealth = {
+    status: "unavailable",
+    validationToken: "github-workflow-unavailable",
+    blocker:
+      "GitHub workflow inspection is not configured for this continuation cycle.",
+    recommendation:
+      "Keep local and scheduled validation active; restore the approved GitHub credential only through provider settings.",
+  }
 ) {
   return {
     validationStatus: [
       "database-probe-passed",
       "schedule-ownership-passed",
+      githubWorkflow.validationToken,
       `cycle-${executionNumber}-within-${maxCycles}-limit`,
     ].join(","),
+    remainingBlocker: githubWorkflow.blocker,
     nextRecommendedAction:
       executionNumber >= maxCycles
         ? "Pause the hourly continuation schedule because the configured cycle limit has been reached."
-        : "Wait for the next scheduled hourly website health check.",
+        : githubWorkflow.recommendation,
   };
 }
 
@@ -160,9 +174,11 @@ export async function runHourlyContinuation(taskUid: string, now = new Date()) {
   const executionNumber = control.completedCycles + 1;
   try {
     await db.execute(sql`SELECT 1 AS health_probe`);
+    const githubWorkflow = await inspectGitHubWorkflowHealth();
     const validation = buildContinuationValidation(
       executionNumber,
-      control.maxCycles
+      control.maxCycles,
+      githubWorkflow
     );
     const [inserted] = await db.insert(continuationCycles).values({
       controlId: control.id,
@@ -173,7 +189,7 @@ export async function runHourlyContinuation(taskUid: string, now = new Date()) {
       result: "completed",
       recoveryAttempt: 0,
       validationStatus: validation.validationStatus,
-      remainingBlocker: null,
+      remainingBlocker: validation.remainingBlocker,
       nextRecommendedAction: validation.nextRecommendedAction,
     });
     await db
