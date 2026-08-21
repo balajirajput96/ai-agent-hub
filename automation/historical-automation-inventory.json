@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastAuditedAt": "2026-08-21T10:12:35+00:00",
+  "lastAuditedAt": "2026-08-21T21:57:06+00:00",
   "secretPolicy": "This inventory records capability and boundary metadata only. It never stores credential values, tokens, cookies, or private command arguments.",
   "repositories": [
     {
@@ -62,7 +62,7 @@
       "trigger": "planned hourly UTC callback, capped at 2,400 cycles",
       "classification": "active; authorized production callbacks verified",
       "purpose": "Verify cron authentication, database availability, task ownership, and bounded read-only GitHub workflow health before persisting an idempotent non-secret cycle record.",
-      "evidence": "The project-owned Heartbeat is enabled at 0 0 * * * * UTC. Ten authorized callbacks have returned HTTP 200. The ninth and tenth cycles recorded database-probe, schedule-ownership, GitHub-workflow-passed, and cycle-limit validation results."
+      "evidence": "The project-owned Heartbeat is enabled at 0 0 * * * * UTC. Sixteen authorized callbacks have returned HTTP 200. The latest verified cycle recorded database-probe, schedule-ownership, GitHub-workflow-passed, and cycle-limit validation results."
     },
     {
       "name": "Daily GitHub and Drive summary",
