@@ -20,4 +20,4 @@ After a project owner creates or replaces the Heartbeat schedule, an authenticat
 
 ## Verified production state
 
-The enabled project-owned Heartbeat runs at `0 0 * * * *` UTC. Its first four authorized production callbacks returned HTTP 200 and wrote distinct UTC-hour records with the database probe, schedule ownership, and cycle-limit validation fields. The existing `Daily GitHub and Drive summary` remains active at 09:00 Asia/Calcutta with its established read-only instruction; the website continuation handler neither invokes nor modifies that task-level schedule.
+The enabled project-owned Heartbeat runs at `0 0 * * * *` UTC. Eight authorized production callbacks have returned HTTP 200 and written distinct UTC-hour records. The eighth cycle confirmed the database probe, schedule ownership, GitHub-workflow-passed, and cycle-limit fields in one non-secret record. The existing `Daily GitHub and Drive summary` remains active at 09:00 Asia/Calcutta with its established read-only instruction; the website continuation handler neither invokes nor modifies that task-level schedule.
