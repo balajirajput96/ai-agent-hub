@@ -41,9 +41,9 @@ jobs:
 
       - name: Upload maintenance record
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: daily-maintenance-${{ github.run_id }}
           path: maintenance-output
           if-no-files-found: error
-          retention-days: 100
+          retention-days: 90
