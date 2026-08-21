@@ -36,8 +36,6 @@ jobs:
       - name: Run maintenance checks
         env:
           MAINTENANCE_OUTPUT_DIR: maintenance-output
-          # drizzle-kit check validates local migration metadata and does not open a database connection.
-          DATABASE_URL: mysql://ci:ci@127.0.0.1:3306/ci_validation
         run: |
           pnpm maintenance:check
 
@@ -48,4 +46,4 @@ jobs:
           name: daily-maintenance-${{ github.run_id }}
           path: maintenance-output
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 100

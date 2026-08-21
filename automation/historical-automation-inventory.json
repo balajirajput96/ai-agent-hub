@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastAuditedAt": "2026-08-20T19:42:46+00:00",
+  "lastAuditedAt": "2026-08-21T06:52:52+00:00",
   "secretPolicy": "This inventory records capability and boundary metadata only. It never stores credential values, tokens, cookies, or private command arguments.",
   "repositories": [
     {
@@ -51,8 +51,8 @@
       "name": "Daily Maintenance",
       "owner": "GitHub repository",
       "trigger": "daily at 03:15 UTC and manual dispatch",
-      "classification": "working locally; hosted runner availability externally bounded",
-      "purpose": "Run the reusable format, type, test, build, migration, audit, and diff checks and upload non-secret execution artifacts."
+      "classification": "working locally and in hosted GitHub Actions",
+      "purpose": "Run the reusable inventory, format, type, test, build, migration, audit, and diff checks and upload non-secret execution artifacts retained for 100 days."
     },
     {
       "name": "Hourly website continuation",
@@ -84,7 +84,7 @@
     {
       "name": "Gemini CLI",
       "classification": "external authentication required",
-      "boundary": "CLI 0.55.1 is installed and the connector is enabled, but a supported connectivity check returns API_KEY_INVALID."
+      "boundary": "CLI 0.55.1 is installed and its supported trusted-workspace connectivity check returns API_KEY_INVALID; provider-managed credential renewal is required."
     },
     {
       "name": "Antigravity CLI",
