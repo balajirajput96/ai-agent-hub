@@ -398,6 +398,27 @@ export default function ChatDashboard() {
           </div>
         </div>
 
+        <div className="border-b border-slate-800 bg-slate-950/30 p-4">
+          <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <UserIcon className="h-3.5 w-3.5 text-cyan-300" />
+            Private workspace
+          </h2>
+          <a
+            href="/facebook-profile"
+            className="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3 text-xs transition-colors hover:bg-cyan-500/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/70"
+          >
+            <span>
+              <span className="block font-medium text-cyan-100">
+                Facebook profile review
+              </span>
+              <span className="mt-1 block leading-relaxed text-slate-400">
+                Evidence you provide, self-review, and manual application only.
+              </span>
+            </span>
+            <Sparkles className="ml-3 h-4 w-4 shrink-0 text-cyan-300" />
+          </a>
+        </div>
+
         <div className="p-4 border-b border-slate-800 bg-slate-950/30">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
             <CalendarClock className="w-3.5 h-3.5 text-indigo-400" />

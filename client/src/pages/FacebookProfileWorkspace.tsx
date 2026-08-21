@@ -33,6 +33,9 @@ export default function FacebookProfileWorkspace() {
     ? (data?.actions.filter(item => item.status === "approved") ?? [])
     : [];
   const refresh = () => utils.facebookProfile.getProfile.invalidate();
+  const hasPendingBioApproval = pendingActions.some(
+    item => item.actionType === "bio_update"
+  );
   const saveBio = trpc.facebookProfile.updateBio.useMutation({
     onSuccess: refresh,
   });
@@ -54,15 +57,15 @@ export default function FacebookProfileWorkspace() {
   const exportText = useMemo(
     () =>
       [
-        "FACEBOOK PROFILE — APPROVED EXPORT",
+        "FACEBOOK PROFILE — USER-REVIEWED EXPORT",
         "",
         "Apply only in Facebook manually after completing login, CAPTCHA, and 2FA.",
         "",
-        "APPROVED BIO",
+        "USER-APPROVED BIO DRAFT",
         approvedActions.find(item => item.actionType === "bio_update")
           ?.proposedContent || "No approved bio change.",
         "",
-        "VERIFIED FACTS",
+        "EVIDENCE YOU PROVIDED",
         data?.facts.length
           ? data.facts
               .map(item => `• ${item.factTitle}: ${item.factDetails}`)
@@ -104,7 +107,7 @@ export default function FacebookProfileWorkspace() {
               Facebook Profile Professional Optimizer
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Evidence-first drafting, approval gates, and manual application
+              User-provided evidence, self-review gates, and manual application
               guidance.
             </p>
           </div>
@@ -129,13 +132,13 @@ export default function FacebookProfileWorkspace() {
         <section className="rounded-2xl border border-white/10 bg-slate-900 p-6">
           <h2 className="text-lg font-semibold">Professional bio draft</h2>
           <p className="mt-1 text-sm text-slate-400">
-            Use only facts you can support with evidence.
+            Use only information you can support with evidence that you provide.
           </p>
           <Textarea
             className="mt-4 min-h-36 bg-slate-950"
             value={visibleBio}
             onChange={event => setBio(event.target.value)}
-            placeholder="Write an accurate professional bio based on verified facts."
+            placeholder="Write an accurate professional bio based on evidence you provide."
           />
           <div className="mt-4 flex flex-wrap gap-3">
             <Button
@@ -150,11 +153,12 @@ export default function FacebookProfileWorkspace() {
               disabled={
                 !hasEvidence ||
                 !data?.profile.proposedBio ||
+                hasPendingBioApproval ||
                 requestApproval.isPending
               }
               onClick={() => requestApproval.mutate()}
             >
-              Request approval
+              Request review
             </Button>
           </div>
         </section>
@@ -166,11 +170,11 @@ export default function FacebookProfileWorkspace() {
           </h2>
           <dl className="mt-5 space-y-3 text-sm">
             <div className="flex justify-between">
-              <dt className="text-slate-400">Verified facts</dt>
+              <dt className="text-slate-400">Evidence you provided</dt>
               <dd>{data?.facts.length ?? 0}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-slate-400">Approved actions</dt>
+              <dt className="text-slate-400">Reviewed actions</dt>
               <dd>{approvedActions.length}</dd>
             </div>
             <div className="flex justify-between">
@@ -181,13 +185,16 @@ export default function FacebookProfileWorkspace() {
             </div>
           </dl>
           <p className="mt-5 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-3 text-sm text-slate-300">
-            Unverified legacy records are excluded. Only actions created after
-            verified evidence can be approved or exported.
+            Information in this workspace is not independently verified. Only
+            draft actions created after you provide supporting evidence can be
+            self-approved or exported.
           </p>
         </aside>
 
         <section className="rounded-2xl border border-white/10 bg-slate-900 p-6">
-          <h2 className="text-lg font-semibold">Verified facts and skills</h2>
+          <h2 className="text-lg font-semibold">
+            Evidence you provide and skills
+          </h2>
           <form
             className="mt-4 grid gap-3"
             onSubmit={event => {
@@ -225,7 +232,7 @@ export default function FacebookProfileWorkspace() {
               onChange={event =>
                 setFact({ ...fact, title: event.target.value })
               }
-              placeholder="Verified title"
+              placeholder="Evidence title"
               required
             />
             <Textarea
@@ -234,7 +241,7 @@ export default function FacebookProfileWorkspace() {
               onChange={event =>
                 setFact({ ...fact, details: event.target.value })
               }
-              placeholder="Evidence-backed details"
+              placeholder="Evidence details"
               required
             />
             <Input
@@ -245,7 +252,7 @@ export default function FacebookProfileWorkspace() {
               }
               placeholder="Evidence source (optional)"
             />
-            <Button disabled={addFact.isPending}>Add verified fact</Button>
+            <Button disabled={addFact.isPending}>Add evidence</Button>
           </form>
           <form
             className="mt-6 flex flex-col gap-3 sm:flex-row"
@@ -300,7 +307,7 @@ export default function FacebookProfileWorkspace() {
 
         <section className="rounded-2xl border border-white/10 bg-slate-900 p-6">
           <h2 className="text-lg font-semibold">
-            Approval and manual privacy checklist
+            Review and manual privacy checklist
           </h2>
           <div className="mt-4 space-y-3">
             {pendingActions.length ? (
@@ -320,7 +327,7 @@ export default function FacebookProfileWorkspace() {
                         })
                       }
                     >
-                      Approve
+                      Mark reviewed
                     </Button>
                     <Button
                       size="sm"
@@ -339,7 +346,7 @@ export default function FacebookProfileWorkspace() {
               ))
             ) : (
               <p className="text-sm text-slate-400">
-                No evidence-backed approval requests yet.
+                No evidence-backed review requests yet.
               </p>
             )}
           </div>
@@ -371,7 +378,7 @@ export default function FacebookProfileWorkspace() {
             ) : (
               <>
                 <Copy className="mr-2 h-4 w-4" />
-                Copy approved export
+                Copy reviewed export
               </>
             )}
           </Button>

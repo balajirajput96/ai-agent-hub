@@ -11,6 +11,10 @@ import {
 } from "../../drizzle/schema";
 import { getDb } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
+import {
+  canResolveApproval,
+  getApprovalRequestBlocker,
+} from "../services/facebookProfilePolicy";
 
 async function ownProfile(userId: number, fullName?: string | null) {
   const db = await getDb();
@@ -82,15 +86,29 @@ export const facebookProfileRouter = router({
       .from(fbVerifiedFacts)
       .where(eq(fbVerifiedFacts.profileId, profile.id))
       .limit(1);
-    if (!facts[0])
-      throw new Error("Add a verified fact before requesting approval");
-    if (!profile.proposedBio)
-      throw new Error("Save a proposed bio before requesting approval");
+    const pendingActions = await db
+      .select()
+      .from(fbActionApprovals)
+      .where(
+        and(
+          eq(fbActionApprovals.profileId, profile.id),
+          eq(fbActionApprovals.actionType, "bio_update"),
+          eq(fbActionApprovals.status, "pending_approval")
+        )
+      )
+      .limit(1);
+    const proposedBio = profile.proposedBio?.trim() || null;
+    const blocker = getApprovalRequestBlocker({
+      hasEvidence: Boolean(facts[0]),
+      proposedBio,
+      hasPendingBioApproval: Boolean(pendingActions[0]),
+    });
+    if (blocker) throw new Error(blocker);
     await db.insert(fbActionApprovals).values({
       profileId: profile.id,
       actionType: "bio_update",
       description: "Apply proposed professional bio manually in Facebook",
-      proposedContent: profile.proposedBio,
+      proposedContent: proposedBio!,
       status: "pending_approval",
     });
     return { success: true };
@@ -104,6 +122,20 @@ export const facebookProfileRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { db, profile } = await ownProfile(ctx.user.id, ctx.user.name);
+      const [action] = await db
+        .select()
+        .from(fbActionApprovals)
+        .where(
+          and(
+            eq(fbActionApprovals.id, input.actionId),
+            eq(fbActionApprovals.profileId, profile.id)
+          )
+        )
+        .limit(1);
+      if (!action) throw new Error("Manual review request not found");
+      if (!canResolveApproval(action.status)) {
+        throw new Error("Only pending manual review requests can be resolved");
+      }
       await db
         .update(fbActionApprovals)
         .set({ status: input.status })
