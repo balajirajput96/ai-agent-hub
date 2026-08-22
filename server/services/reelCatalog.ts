@@ -1,9 +1,46 @@
 import { and, desc, eq } from "drizzle-orm";
-import { reelCatalog } from "../../drizzle/schema";
+import {
+  reelCatalog,
+  reelProductionControls,
+  reelRetryQueue,
+} from "../../drizzle/schema";
 import { getDb } from "../db";
 
 export const REEL_0001_SOURCE_RECORD = "reels/REEL_0001_RESEARCH.md";
 export const REEL_0001_DRIVE_FOLDER_ID = "1585_x-GJem9bYkk31DkGGBwnAI_TXCep";
+export const REEL_TARGET = 3000;
+export const REELS_PER_BATCH = 30;
+
+export function getBatchNumber(reelNumber: number) {
+  if (!Number.isInteger(reelNumber) || reelNumber < 1)
+    throw new Error("Reel number must be a positive integer");
+  return Math.ceil(reelNumber / REELS_PER_BATCH);
+}
+
+export function getReelUniqueKey(title: string, topic: string) {
+  return `${topic} ${title}`
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 255);
+}
+
+export function getNextEligibleReelNumber(
+  reels: Array<{ reelNumber: number; status: string }>,
+  targetReels = REEL_TARGET
+) {
+  const pending = [...reels]
+    .filter(reel => reel.status !== "uploaded")
+    .sort((left, right) => left.reelNumber - right.reelNumber)[0];
+  if (pending) return pending.reelNumber;
+  const highest = reels.reduce(
+    (max, reel) => Math.max(max, reel.reelNumber),
+    0
+  );
+  return Math.min(highest + 1, targetReels);
+}
 
 export const REEL_0001 = {
   reelNumber: 1,
@@ -71,6 +108,82 @@ export async function getUserReels(userId: number, limit: number) {
     .where(eq(reelCatalog.userId, userId))
     .orderBy(desc(reelCatalog.reelNumber))
     .limit(limit);
+}
+
+export async function getReelProductionStatus(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [control] = await db
+    .select()
+    .from(reelProductionControls)
+    .where(eq(reelProductionControls.userId, userId))
+    .limit(1);
+  const reels = await db
+    .select()
+    .from(reelCatalog)
+    .where(eq(reelCatalog.userId, userId))
+    .orderBy(desc(reelCatalog.reelNumber));
+  const retryItems = await db
+    .select()
+    .from(reelRetryQueue)
+    .where(eq(reelRetryQueue.status, "queued"));
+  const completedReels = reels.filter(
+    reel => reel.status === "uploaded"
+  ).length;
+  const researchReadyReels = reels.filter(
+    reel => reel.status === "research_ready" || reel.status === "script_ready"
+  ).length;
+  const mediaBlockedReels = reels.filter(
+    reel => reel.status === "media_blocked"
+  ).length;
+  const nextReelNumber = getNextEligibleReelNumber(reels);
+
+  return {
+    targetReels: control?.targetReels ?? REEL_TARGET,
+    batchSize: control?.batchSize ?? REELS_PER_BATCH,
+    completedReels,
+    researchReadyReels,
+    mediaBlockedReels,
+    retryQueuedReels: retryItems.length,
+    currentBatchNumber: getBatchNumber(nextReelNumber),
+    nextReelNumber,
+    currentCapacityBoundary: control?.currentCapacityBoundary ?? null,
+  };
+}
+
+export async function bootstrapReelProductionControl(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [existing] = await db
+    .select()
+    .from(reelProductionControls)
+    .where(eq(reelProductionControls.userId, userId))
+    .limit(1);
+  if (existing) return getReelProductionStatus(userId);
+
+  const reels = await db
+    .select()
+    .from(reelCatalog)
+    .where(eq(reelCatalog.userId, userId));
+  const nextReelNumber = getNextEligibleReelNumber(reels);
+  await db.insert(reelProductionControls).values({
+    userId,
+    targetReels: REEL_TARGET,
+    batchSize: REELS_PER_BATCH,
+    currentBatchNumber: getBatchNumber(nextReelNumber),
+    nextReelNumber,
+    completedReels: reels.filter(reel => reel.status === "uploaded").length,
+    researchReadyReels: reels.filter(
+      reel => reel.status === "research_ready" || reel.status === "script_ready"
+    ).length,
+    mediaBlockedReels: reels.filter(reel => reel.status === "media_blocked")
+      .length,
+    currentCapacityBoundary:
+      "Native video generation reached the free-plan daily limit after Reel 0001. Reel 0002 remains research-ready and must enter the retry queue before media work resumes.",
+  });
+  return getReelProductionStatus(userId);
 }
 
 export async function bootstrapReel0001(userId: number) {

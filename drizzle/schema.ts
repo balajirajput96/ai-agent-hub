@@ -5,6 +5,7 @@ import {
   mysqlTable,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
 
@@ -144,33 +145,59 @@ export type ContinuationCycle = typeof continuationCycles.$inferSelect;
  * pipeline. It stores editorial evidence and progress, not media bytes or
  * provider credentials.
  */
-export const reelCatalog = mysqlTable("reel_catalog", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  reelNumber: int("reelNumber").notNull(),
-  title: varchar("title", { length: 255 }).notNull(),
-  topic: varchar("topic", { length: 255 }).notNull(),
-  status: mysqlEnum("status", [
-    "research_ready",
-    "script_ready",
-    "media_blocked",
-    "qc_pending",
-    "qc_passed",
-    "uploaded",
-    "failed",
-  ])
-    .default("research_ready")
-    .notNull(),
-  evidenceSummary: text("evidenceSummary").notNull(),
-  scriptText: text("scriptText").notNull(),
-  captionText: text("captionText").notNull(),
-  visualPlan: text("visualPlan").notNull(),
-  driveFolderId: varchar("driveFolderId", { length: 128 }),
-  sourceRecordPath: varchar("sourceRecordPath", { length: 512 }).notNull(),
-  lastBlocker: text("lastBlocker"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+export const reelCatalog = mysqlTable(
+  "reel_catalog",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    reelNumber: int("reelNumber").notNull(),
+    batchNumber: int("batchNumber").default(1).notNull(),
+    uniqueKey: varchar("uniqueKey", { length: 255 }),
+    title: varchar("title", { length: 255 }).notNull(),
+    topic: varchar("topic", { length: 255 }).notNull(),
+    status: mysqlEnum("status", [
+      "research_ready",
+      "script_ready",
+      "media_blocked",
+      "qc_pending",
+      "qc_passed",
+      "uploaded",
+      "failed",
+    ])
+      .default("research_ready")
+      .notNull(),
+    evidenceSummary: text("evidenceSummary").notNull(),
+    evidenceClass: mysqlEnum("evidenceClass", [
+      "established_evidence",
+      "strong_evidence",
+      "emerging_evidence",
+      "mixed_evidence",
+      "preliminary_finding",
+      "expert_interpretation",
+      "philosophical_concept",
+      "spiritual_traditional_belief",
+    ])
+      .default("established_evidence")
+      .notNull(),
+    expectedDurationSeconds: int("expectedDurationSeconds")
+      .default(60)
+      .notNull(),
+    scriptText: text("scriptText").notNull(),
+    captionText: text("captionText").notNull(),
+    visualPlan: text("visualPlan").notNull(),
+    driveFolderId: varchar("driveFolderId", { length: 128 }),
+    sourceRecordPath: varchar("sourceRecordPath", { length: 512 }).notNull(),
+    lastBlocker: text("lastBlocker"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  table => [
+    uniqueIndex("reel_catalog_user_unique_key").on(
+      table.userId,
+      table.uniqueKey
+    ),
+  ]
+);
 
 export const reelAssets = mysqlTable("reel_assets", {
   id: int("id").autoincrement().primaryKey(),
@@ -205,6 +232,96 @@ export const reelAssets = mysqlTable("reel_assets", {
 export type ReelCatalog = typeof reelCatalog.$inferSelect;
 export type InsertReelCatalog = typeof reelCatalog.$inferInsert;
 export type ReelAsset = typeof reelAssets.$inferSelect;
+
+/**
+ * Per-owner durable control for the 3,000-reel production mission. It stores
+ * only non-secret operational counts and the current capacity boundary; media
+ * bytes and provider credentials remain outside the database.
+ */
+export const reelProductionControls = mysqlTable("reel_production_controls", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  targetReels: int("targetReels").default(3000).notNull(),
+  batchSize: int("batchSize").default(30).notNull(),
+  currentBatchNumber: int("currentBatchNumber").default(1).notNull(),
+  nextReelNumber: int("nextReelNumber").default(1).notNull(),
+  completedReels: int("completedReels").default(0).notNull(),
+  researchReadyReels: int("researchReadyReels").default(0).notNull(),
+  mediaBlockedReels: int("mediaBlockedReels").default(0).notNull(),
+  retryQueuedReels: int("retryQueuedReels").default(0).notNull(),
+  currentCapacityBoundary: text("currentCapacityBoundary"),
+  masterProgressDriveFileId: varchar("masterProgressDriveFileId", {
+    length: 128,
+  }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+/**
+ * Structured, source-attributed findings for reuse across unique reels. Each
+ * record classifies evidence rather than mixing scientific and belief claims.
+ */
+export const reelResearchRecords = mysqlTable("reel_research_records", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  topic: varchar("topic", { length: 255 }).notNull(),
+  subtopic: varchar("subtopic", { length: 255 }),
+  finding: text("finding").notNull(),
+  evidenceClass: mysqlEnum("evidenceClass", [
+    "established_evidence",
+    "strong_evidence",
+    "emerging_evidence",
+    "mixed_evidence",
+    "preliminary_finding",
+    "expert_interpretation",
+    "philosophical_concept",
+    "spiritual_traditional_belief",
+  ]).notNull(),
+  sourceTitle: text("sourceTitle").notNull(),
+  sourceUrl: varchar("sourceUrl", { length: 1024 }).notNull(),
+  limitations: text("limitations").notNull(),
+  usageStatus: mysqlEnum("usageStatus", ["unused", "assigned", "used"])
+    .default("unused")
+    .notNull(),
+  assignedReelId: int("assignedReelId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+/**
+ * A non-secret retry queue prevents capacity and provider failures from being
+ * silently skipped. Records are resolved only after a subsequent successful
+ * pipeline stage is independently verified.
+ */
+export const reelRetryQueue = mysqlTable("reel_retry_queue", {
+  id: int("id").autoincrement().primaryKey(),
+  reelId: int("reelId").notNull(),
+  pipelineStage: mysqlEnum("pipelineStage", [
+    "research",
+    "verify",
+    "script",
+    "voice",
+    "visuals",
+    "render",
+    "qc",
+    "upload",
+  ]).notNull(),
+  status: mysqlEnum("status", ["queued", "in_progress", "resolved"])
+    .default("queued")
+    .notNull(),
+  attemptCount: int("attemptCount").default(0).notNull(),
+  failureCategory: varchar("failureCategory", { length: 128 }).notNull(),
+  errorSummary: text("errorSummary").notNull(),
+  nextRecommendedAction: text("nextRecommendedAction").notNull(),
+  nextAttemptAt: timestamp("nextAttemptAt"),
+  resolvedAt: timestamp("resolvedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ReelProductionControl = typeof reelProductionControls.$inferSelect;
+export type ReelResearchRecord = typeof reelResearchRecords.$inferSelect;
+export type ReelRetryQueueItem = typeof reelRetryQueue.$inferSelect;
 
 export const fbProfiles = mysqlTable("fb_profiles", {
   id: int("id").autoincrement().primaryKey(),

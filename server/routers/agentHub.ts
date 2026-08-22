@@ -95,8 +95,14 @@ export const agentHubRouter = router({
     .query(({ ctx, input }) =>
       reelCatalogDb.getUserReels(ctx.user.id, input?.limit ?? 12)
     ),
+  getReelProductionStatus: protectedProcedure.query(({ ctx }) =>
+    reelCatalogDb.getReelProductionStatus(ctx.user.id)
+  ),
   bootstrapReel0001: adminProcedure.mutation(({ ctx }) =>
     reelCatalogDb.bootstrapReel0001(ctx.user.id)
+  ),
+  bootstrapReelProductionControl: adminProcedure.mutation(({ ctx }) =>
+    reelCatalogDb.bootstrapReelProductionControl(ctx.user.id)
   ),
 
   uploadAttachment: protectedProcedure

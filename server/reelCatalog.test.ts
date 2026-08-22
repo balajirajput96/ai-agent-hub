@@ -3,6 +3,11 @@ import {
   REEL_0001,
   REEL_0001_DRIVE_FOLDER_ID,
   REEL_0001_SOURCE_RECORD,
+  REELS_PER_BATCH,
+  REEL_TARGET,
+  getBatchNumber,
+  getNextEligibleReelNumber,
+  getReelUniqueKey,
 } from "./services/reelCatalog";
 
 describe("Reel 0001 catalog definition", () => {
@@ -24,5 +29,29 @@ describe("Reel 0001 catalog definition", () => {
     expect(visualPlan.scenes).toHaveLength(5);
     expect(REEL_0001.driveFolderId).toBe(REEL_0001_DRIVE_FOLDER_ID);
     expect(REEL_0001.sourceRecordPath).toBe(REEL_0001_SOURCE_RECORD);
+  });
+
+  it("maps the 3,000-reel mission into deterministic 30-reel batches", () => {
+    expect(REEL_TARGET).toBe(3000);
+    expect(REELS_PER_BATCH).toBe(30);
+    expect(getBatchNumber(1)).toBe(1);
+    expect(getBatchNumber(30)).toBe(1);
+    expect(getBatchNumber(31)).toBe(2);
+    expect(getBatchNumber(3000)).toBe(100);
+  });
+
+  it("keeps unique topic keys stable and prioritizes unfinished reels", () => {
+    expect(
+      getReelUniqueKey("Memory: recall and updating", "Neuroscience")
+    ).toBe("neuroscience-memory-recall-and-updating");
+    expect(
+      getNextEligibleReelNumber([
+        { reelNumber: 1, status: "uploaded" },
+        { reelNumber: 2, status: "research_ready" },
+      ])
+    ).toBe(2);
+    expect(
+      getNextEligibleReelNumber([{ reelNumber: 1, status: "uploaded" }])
+    ).toBe(2);
   });
 });

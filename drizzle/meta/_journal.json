@@ -57,6 +57,13 @@
       "when": 1787388776326,
       "tag": "0007_puzzling_maelstrom",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1787400144321,
+      "tag": "0008_chief_gauntlet",
+      "breakpoints": true
     }
   ]
 }

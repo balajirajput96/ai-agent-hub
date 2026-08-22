@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "project": "3000_HINDI_RESEARCH_REELS",
+  "sourceOfTruth": "The owner-scoped reel_catalog, reel_assets, reel_production_controls, reel_research_records, and reel_retry_queue database tables are authoritative. This file is a non-secret restart and Drive-delivery manifest.",
+  "targetReels": 3000,
+  "batchSize": 30,
+  "batchCount": 100,
+  "verifiedProgress": {
+    "uploadedReels": [1],
+    "researchReadyReels": [2, 3],
+    "retryQueue": [
+      {
+        "reelNumber": 2,
+        "pipelineStage": "visuals",
+        "failureCategory": "generation_capacity_limit"
+      },
+      {
+        "reelNumber": 3,
+        "pipelineStage": "visuals",
+        "failureCategory": "generation_capacity_limit"
+      }
+    ],
+    "nextEligibleReel": 2
+  },
+  "capacityBoundary": "Native video generation reached the free-plan daily limit after Reel 0001. Reel 0002 is research-ready and must not be marked completed until media, QC, and Drive verification finish.",
+  "atomicCompletionRule": [
+    "Rendered video exists",
+    "Quality control passes",
+    "Evidence metadata is saved",
+    "Connected Google Drive upload is verified",
+    "Durable catalog and asset ledger are updated"
+  ]
+}
