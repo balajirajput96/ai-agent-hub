@@ -1,13 +1,23 @@
 {
   "schemaVersion": 1,
-  "lastAuditedAt": "2026-08-21T23:51:09+00:00",
+  "lastAuditedAt": "2026-08-22T03:13:23Z",
   "secretPolicy": "This inventory records capability and boundary metadata only. It never stores credential values, tokens, cookies, or private command arguments.",
   "preservationSnapshot": {
-    "createdAt": "2026-08-21T23:18:23Z",
-    "path": "/home/ubuntu/github-repair/state-snapshots/20260821T231823Z",
-    "classification": "concurrent task-local record of a redacted engineering-state snapshot",
-    "contents": "A concurrent task recorded six accessible Git worktree reports, eleven non-secret repair artifacts, and a generated artifact manifest. This task preserves the reference without assuming cross-task filesystem availability."
+    "createdAt": "2026-08-22T03:09:39Z",
+    "path": "/home/ubuntu/github-repair/state-snapshots/20260822T030939Z",
+    "classification": "current-task redacted engineering-state snapshot; retain prior task-local snapshot references in Git history without assuming cross-task filesystem availability",
+    "contents": "A refreshed 610-row machine-readable artifact manifest covers accessible worktree reports, repair artifacts, and non-secret state; no shell-history file was present to preserve."
   },
+  "activeRepairs": [
+    {
+      "repository": "balajirajput96/codex",
+      "branch": "fix/windows-code-mode-nextest-timeout",
+      "pullRequest": "https://github.com/balajirajput96/codex/pull/52",
+      "workflowRun": "https://github.com/balajirajput96/codex/actions/runs/32548383544",
+      "classification": "active hosted validation",
+      "purpose": "Windows-only nextest timeout override for a 64-case stdio MCP integration matrix that exceeded its default one-minute test budget."
+    }
+  ],
   "repositories": [
     {
       "name": "managed-ai-agent-hub",
@@ -47,7 +57,7 @@
       "reusableAssets": [
         "scripts/preserve_environment_state.sh",
         "github-repair-audit.md",
-        "state-snapshots/20260821T231823Z/artifact_manifest.tsv"
+        "state-snapshots/20260822T030939Z/artifact_manifest.tsv"
       ]
     }
   ],
@@ -71,7 +81,7 @@
       "owner": "GitHub repository",
       "trigger": "daily at 03:15 UTC and manual dispatch",
       "classification": "working locally and in hosted GitHub Actions",
-      "purpose": "Run the reusable inventory, format, type, test, build, migration, audit, and diff checks and upload non-secret execution artifacts retained for 100 days."
+      "purpose": "Run the reusable inventory, format, type, test, build, migration, audit, and diff checks and upload non-secret execution artifacts retained for 90 days."
     },
     {
       "name": "Hourly website continuation",
