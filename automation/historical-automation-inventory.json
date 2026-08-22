@@ -169,8 +169,8 @@
   "historicalAudit": {
     "terminalHistory": {
       "source": "/home/ubuntu/.bash_history",
-      "classification": "available with safe metadata-only review in this task",
-      "reuseRecommendation": "Do not replay commands automatically; continue to promote only freshly validated procedures into version-controlled scripts. Other task contexts may not expose this history."
+      "classification": "task-context-dependent: available with safe metadata-only review in a preserved task and unavailable in the current session",
+      "reuseRecommendation": "Do not infer or replay historical commands. Continue to promote only freshly validated procedures into version-controlled scripts; other task contexts may not expose this history."
     },
     "runtimeLogs": {
       "source": ".manus-logs/, local maintenance-output/, and retained GitHub Actions artifacts",
