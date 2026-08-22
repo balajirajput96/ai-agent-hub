@@ -81,7 +81,7 @@
       "owner": "GitHub repository",
       "trigger": "daily at 03:15 UTC and manual dispatch",
       "classification": "working locally and in hosted GitHub Actions",
-      "purpose": "Run the reusable inventory, format, type, test, build, migration, audit, and diff checks and upload non-secret execution artifacts retained for 90 days."
+      "purpose": "Run the reusable inventory, format, type, test, build, migration, audit, and diff checks and upload non-secret execution artifacts retained for 100 days."
     },
     {
       "name": "Hourly website continuation",
