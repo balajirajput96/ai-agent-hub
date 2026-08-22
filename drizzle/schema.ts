@@ -139,6 +139,73 @@ export const continuationCycles = mysqlTable("continuation_cycles", {
 export type ContinuationControl = typeof continuationControls.$inferSelect;
 export type ContinuationCycle = typeof continuationCycles.$inferSelect;
 
+/**
+ * Owner-scoped, non-secret production catalog for the Hindi research-reels
+ * pipeline. It stores editorial evidence and progress, not media bytes or
+ * provider credentials.
+ */
+export const reelCatalog = mysqlTable("reel_catalog", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  reelNumber: int("reelNumber").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  topic: varchar("topic", { length: 255 }).notNull(),
+  status: mysqlEnum("status", [
+    "research_ready",
+    "script_ready",
+    "media_blocked",
+    "qc_pending",
+    "qc_passed",
+    "uploaded",
+    "failed",
+  ])
+    .default("research_ready")
+    .notNull(),
+  evidenceSummary: text("evidenceSummary").notNull(),
+  scriptText: text("scriptText").notNull(),
+  captionText: text("captionText").notNull(),
+  visualPlan: text("visualPlan").notNull(),
+  driveFolderId: varchar("driveFolderId", { length: 128 }),
+  sourceRecordPath: varchar("sourceRecordPath", { length: 512 }).notNull(),
+  lastBlocker: text("lastBlocker"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const reelAssets = mysqlTable("reel_assets", {
+  id: int("id").autoincrement().primaryKey(),
+  reelId: int("reelId").notNull(),
+  assetType: mysqlEnum("assetType", [
+    "research",
+    "script",
+    "captions",
+    "voice",
+    "music",
+    "video",
+    "thumbnail",
+    "metadata",
+  ]).notNull(),
+  storageProvider: mysqlEnum("storageProvider", [
+    "drive",
+    "project_storage",
+  ]).notNull(),
+  storageReference: text("storageReference").notNull(),
+  verificationStatus: mysqlEnum("verificationStatus", [
+    "pending",
+    "verified",
+    "failed",
+  ])
+    .default("pending")
+    .notNull(),
+  verificationNote: text("verificationNote"),
+  verifiedAt: timestamp("verifiedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ReelCatalog = typeof reelCatalog.$inferSelect;
+export type InsertReelCatalog = typeof reelCatalog.$inferInsert;
+export type ReelAsset = typeof reelAssets.$inferSelect;
+
 export const fbProfiles = mysqlTable("fb_profiles", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),

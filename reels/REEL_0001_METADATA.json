@@ -1,0 +1,64 @@
+{
+  "reelNumber": 1,
+  "title": "आदत 21 दिन में नहीं बनती: सही cue क्यों ज़रूरी है",
+  "topic": "Habit formation, context cues, and automaticity",
+  "language": "hi-IN",
+  "format": {
+    "aspectRatio": "9:16",
+    "resolution": "720x1280",
+    "durationSeconds": 60,
+    "captions": "Hindi SRT"
+  },
+  "evidenceBoundary": {
+    "scientificEvidence": [
+      "Repeated behaviour in a stable context can support automaticity.",
+      "Habit-timing estimates vary substantially across people and behaviours.",
+      "The 21-day rule and a universal 66-day deadline are oversimplifications."
+    ],
+    "notClaimed": [
+      "A fixed neurological timer for every habit.",
+      "Medical, mental-health, or clinical treatment outcomes.",
+      "Spiritual or philosophical claims presented as science."
+    ]
+  },
+  "sources": [
+    {
+      "type": "peer_reviewed",
+      "title": "Making health habitual: the psychology of habit-formation and general practice",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3505409/"
+    },
+    {
+      "type": "peer_reviewed_review",
+      "title": "Psychology of Habit",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26361052/"
+    },
+    {
+      "type": "systematic_review",
+      "title": "Time to Form a Habit: A Systematic Review and Meta-Analysis",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11641623/"
+    },
+    {
+      "type": "university_expert_interview",
+      "title": "Does it really take 66 days to form a habit?",
+      "url": "https://www.surrey.ac.uk/news/does-it-really-take-66-days-form-habit-we-asked-expert-dr-pippa-lally"
+    }
+  ],
+  "assets": [
+    {
+      "file": "REEL_0001_HABIT_CUE.mp4",
+      "type": "video",
+      "verification": "ffprobe: H.264 video, AAC audio, 720x1280, 60 seconds"
+    },
+    {
+      "file": "REEL_0001_CAPTIONS.srt",
+      "type": "captions",
+      "verification": "five generated narration spans and a source-safe closing card"
+    },
+    {
+      "file": "REEL_0001_RESEARCH.md",
+      "type": "research",
+      "verification": "source-attributed evidence record"
+    }
+  ],
+  "mediaGenerationNote": "One 8-second native animated opening clip was generated and incorporated into the render. Further native video generation was unavailable after the free-plan daily video-generation limit was reached; the remaining scenes use the generated reference visual with animated camera treatment, captions, narration, and ambient music."
+}

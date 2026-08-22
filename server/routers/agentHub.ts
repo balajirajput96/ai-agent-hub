@@ -8,6 +8,7 @@ import { chatAttachments, chatSessions } from "../../drizzle/schema";
 import * as chatDb from "../services/chatDb";
 import * as agentTools from "../services/agentTools";
 import * as continuationDb from "../services/continuationDb";
+import * as reelCatalogDb from "../services/reelCatalog";
 import {
   decodeDocumentPayload,
   isAllowedDocument,
@@ -85,6 +86,18 @@ export const agentHubRouter = router({
     .mutation(({ input }) =>
       continuationDb.bootstrapContinuationControl(input.taskUid)
     ),
+  getReelCatalog: protectedProcedure
+    .input(
+      z
+        .object({ limit: z.number().int().min(1).max(50).default(12) })
+        .optional()
+    )
+    .query(({ ctx, input }) =>
+      reelCatalogDb.getUserReels(ctx.user.id, input?.limit ?? 12)
+    ),
+  bootstrapReel0001: adminProcedure.mutation(({ ctx }) =>
+    reelCatalogDb.bootstrapReel0001(ctx.user.id)
+  ),
 
   uploadAttachment: protectedProcedure
     .input(

@@ -1,0 +1,1 @@
+ALTER TABLE `reel_assets` MODIFY COLUMN `assetType` enum('research','script','captions','voice','music','video','thumbnail','metadata') NOT NULL;
