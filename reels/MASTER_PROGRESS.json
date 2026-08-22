@@ -7,7 +7,7 @@
   "batchCount": 100,
   "verifiedProgress": {
     "uploadedReels": [1],
-    "researchReadyReels": [2, 3, 4],
+    "researchReadyReels": [2, 3, 4, 5],
     "retryQueue": [
       {
         "reelNumber": 2,
@@ -21,6 +21,11 @@
       },
       {
         "reelNumber": 4,
+        "pipelineStage": "visuals",
+        "failureCategory": "generation_capacity_limit"
+      },
+      {
+        "reelNumber": 5,
         "pipelineStage": "visuals",
         "failureCategory": "generation_capacity_limit"
       }
