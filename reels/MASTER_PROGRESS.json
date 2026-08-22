@@ -7,7 +7,7 @@
   "batchCount": 100,
   "verifiedProgress": {
     "uploadedReels": [1],
-    "researchReadyReels": [2, 3, 4, 5],
+    "researchReadyReels": [2, 3, 4, 5, 6],
     "retryQueue": [
       {
         "reelNumber": 2,
@@ -28,11 +28,16 @@
         "reelNumber": 5,
         "pipelineStage": "visuals",
         "failureCategory": "generation_capacity_limit"
+      },
+      {
+        "reelNumber": 6,
+        "pipelineStage": "visuals",
+        "failureCategory": "generation_capacity_limit"
       }
     ],
     "nextEligibleReel": 2
   },
-  "capacityBoundary": "Native video generation reached the free-plan daily limit after Reel 0001. Reel 0002 is research-ready and must not be marked completed until media, QC, and Drive verification finish.",
+  "capacityBoundary": "Native video generation reached the free-plan daily limit after Reel 0001. On 2026-08-22, mandatory Reel 0002 reference-image generation was also rejected because the free-plan image quota was exhausted (20/20). Reels 0002–0006 remain research-ready and no queued reel may be marked completed until media, QC, and Drive verification finish.",
   "atomicCompletionRule": [
     "Rendered video exists",
     "Quality control passes",
