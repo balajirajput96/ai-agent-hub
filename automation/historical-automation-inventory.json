@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "lastAuditedAt": "2026-08-21T23:25:53Z",
+  "lastAuditedAt": "2026-08-21T23:51:09+00:00",
   "secretPolicy": "This inventory records capability and boundary metadata only. It never stores credential values, tokens, cookies, or private command arguments.",
   "preservationSnapshot": {
     "createdAt": "2026-08-21T23:18:23Z",
     "path": "/home/ubuntu/github-repair/state-snapshots/20260821T231823Z",
-    "classification": "locally preserved, redacted engineering-state snapshot",
-    "contents": "Six accessible Git worktree reports, eleven non-secret repair artifacts, and a generated artifact manifest; no shell-history file was present to preserve."
+    "classification": "concurrent task-local record of a redacted engineering-state snapshot",
+    "contents": "A concurrent task recorded six accessible Git worktree reports, eleven non-secret repair artifacts, and a generated artifact manifest. This task preserves the reference without assuming cross-task filesystem availability."
   },
   "repositories": [
     {
@@ -42,8 +42,8 @@
     {
       "name": "workspace-repair-audit",
       "path": "/home/ubuntu/github-repair",
-      "role": "Preserved local repair workspace and redacted environment-audit source",
-      "classification": "working; integrated through a non-secret snapshot reference",
+      "role": "Concurrent task-local preserved repair workspace and redacted environment-audit source",
+      "classification": "preserved reference; filesystem availability is task-context-specific",
       "reusableAssets": [
         "scripts/preserve_environment_state.sh",
         "github-repair-audit.md",
@@ -79,21 +79,21 @@
       "trigger": "planned hourly UTC callback, capped at 2,400 cycles",
       "classification": "active; authorized production callbacks verified",
       "purpose": "Verify cron authentication, database availability, task ownership, and bounded read-only GitHub workflow health before persisting an idempotent non-secret cycle record.",
-      "evidence": "The project-owned Heartbeat is enabled at 0 0 * * * * UTC. Sixteen authorized callbacks have returned HTTP 200. The latest verified cycle recorded database-probe, schedule-ownership, GitHub-workflow-passed, and cycle-limit validation results."
+      "evidence": "The project-owned Heartbeat is enabled at 0 0 * * * * UTC. Seventeen authorized callbacks have returned HTTP 200. The latest verified cycle recorded database-probe, schedule-ownership, GitHub-workflow-passed, and cycle-limit validation results."
     },
     {
       "name": "Daily GitHub and Drive summary",
       "owner": "Manus task schedule",
       "trigger": "daily at 09:00 Asia/Kolkata",
-      "classification": "historical task-local schedule; not present in the current task schedule inventory",
-      "purpose": "A prior read-only summary schedule remains preserved as a historical automation record and is not modified by this maintenance system."
+      "classification": "active and read-only in task QIjH57KAndNpyx27moDcDo; task-context-specific",
+      "purpose": "This task verified an active 09:00 Asia/Calcutta GitHub and Drive summary that performs no external mutation. Task-level schedules can be unavailable in other task contexts and must not be recreated or changed solely to reconcile documentation."
     },
     {
       "name": "Daily Engineering Maintenance Report",
       "owner": "Manus task schedule",
       "trigger": "daily at 09:00 Asia/Kolkata",
-      "classification": "active; created and verified in the current task",
-      "purpose": "Loads persisted engineering-maintenance state, inspects the latest GitHub Actions outcomes and continuation evidence, and reports validated repair priorities without bypassing credentials or performing unsafe account mutations."
+      "classification": "concurrent task-local schedule record",
+      "purpose": "A concurrent task recorded a report that loads persisted engineering-maintenance state, inspects GitHub Actions and continuation evidence, and reports validated repair priorities without bypassing credentials or performing unsafe account mutations. This task does not create, modify, or assume access to that schedule."
     }
   ],
   "cliReadiness": [
@@ -105,7 +105,7 @@
     {
       "name": "Google Workspace CLI",
       "classification": "working",
-      "boundary": "A bounded read-only Drive metadata listing succeeded; no Drive mutation was performed."
+      "boundary": "A bounded read-only Drive metadata listing succeeded in this task; no Drive mutation was performed."
     },
     {
       "name": "Hugging Face API",
@@ -114,18 +114,18 @@
     },
     {
       "name": "Google Gemini API",
-      "classification": "working",
-      "boundary": "A read-only models endpoint probe returned HTTP 200 through the enabled provider connection; no provider content or account data was changed."
+      "classification": "working in a concurrent task context",
+      "boundary": "A concurrent task recorded a read-only models endpoint HTTP 200 through an enabled provider connection; no provider content or account data was changed. This does not override the Gemini CLI credential boundary in this task."
     },
     {
       "name": "Gemini CLI",
-      "classification": "unavailable in the current session",
-      "boundary": "No executable is currently present, so provider authentication was not attempted or bypassed."
+      "classification": "external authentication required in this task",
+      "boundary": "CLI 0.55.1 is installed in this task and its trusted-workspace connectivity check returns API_KEY_INVALID; provider-managed credential renewal is required. Other task contexts may not expose the executable."
     },
     {
       "name": "Antigravity CLI",
-      "classification": "unavailable in the current session",
-      "boundary": "No Antigravity executable is present; Jules, gcloud, AWS, and Datadog CLIs are also unavailable and no provider authentication was bypassed."
+      "classification": "external authentication required",
+      "boundary": "No Antigravity executable or connector configuration is available in the current session; previous provider sign-in requirements remain unbypassed."
     },
     {
       "name": "Datadog CLI",
@@ -135,24 +135,32 @@
     {
       "name": "n8n automation integration",
       "classification": "configuration attention",
-      "boundary": "The configured MCP endpoint returned a legacy-SSE initialization error and the configured read-only REST workflow listing returned HTTP 404; no n8n workflow was changed."
+      "boundary": "The current task's MCP initialization returned a legacy-SSE transport error. A concurrent task also recorded a read-only REST workflow-listing HTTP 404. No workflow, credential, or external account was changed."
     }
   ],
   "enabledConnectorScope": {
     "verifiedProjectRelevant": [
-      "GitHub: authenticated CLI and GitHub Actions inspection succeeded",
-      "Google Workspace: bounded read-only Drive metadata listing succeeded",
-      "Google Gemini: enabled provider connection passed a read-only models health probe",
-      "Hugging Face: read-only identity check returned HTTP 401 and remains provider-authentication-bound",
-      "n8n: both configured read-only integration paths require configuration repair before use"
+      "GitHub: authenticated CLI and GitHub Actions inspection succeeded.",
+      "Google Workspace: bounded read-only Drive metadata listing succeeded.",
+      "Google Gemini API: a concurrent task recorded a read-only models health probe success.",
+      "Hugging Face: read-only identity check returned HTTP 401 in this task and remains provider-authentication-bound.",
+      "n8n: available read-only integration paths require configuration repair before use."
     ],
-    "intentionallyNotInvoked": "Other enabled account-level connectors, including deployment, marketing, CMS, email, calendar, browser, and third-party data services, are not referenced by the AI Agent Hub code or its bounded maintenance workflow. They were not invoked to avoid unrelated account reads or mutations."
+    "intentionallyNotInvoked": "Other enabled account-level connectors are not referenced by the AI Agent Hub code or its bounded maintenance workflow. They are not invoked solely for inventory reconciliation to avoid unrelated account reads or mutations."
+  },
+  "verificationScope": {
+    "globalProjectFacts": [
+      "The project-owned hourly Heartbeat is enabled with a 2,400-cycle guard and immutable execution records.",
+      "The daily GitHub and Drive summary is active in task QIjH57KAndNpyx27moDcDo at 09:00 Asia/Calcutta and is read-only.",
+      "GitHub daily-maintenance artifacts are retained for 100 days to cover the 2,400-cycle horizon."
+    ],
+    "taskContextBoundary": "CLI availability, task-level schedule visibility, and connector initialization outcomes are task-context-specific. Conflicting observations are retained with their scope rather than overwritten."
   },
   "historicalAudit": {
     "terminalHistory": {
       "source": "/home/ubuntu/.bash_history",
-      "classification": "unavailable in the current session",
-      "reuseRecommendation": "Do not infer or replay historical commands. Continue to promote only freshly validated procedures into version-controlled scripts."
+      "classification": "available with safe metadata-only review in this task",
+      "reuseRecommendation": "Do not replay commands automatically; continue to promote only freshly validated procedures into version-controlled scripts. Other task contexts may not expose this history."
     },
     "runtimeLogs": {
       "source": ".manus-logs/, local maintenance-output/, and retained GitHub Actions artifacts",

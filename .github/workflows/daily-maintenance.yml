@@ -46,4 +46,4 @@ jobs:
           name: daily-maintenance-${{ github.run_id }}
           path: maintenance-output
           if-no-files-found: error
-          retention-days: 90
+          retention-days: 100

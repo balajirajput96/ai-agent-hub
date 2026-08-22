@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -18,5 +19,15 @@ describe("automation inventory validation", () => {
     expect(result.status).toBe(0);
     expect(result.stdout).toContain('"status": "passed"');
     expect(result.stdout).toContain('"secretValuesRecorded": false');
+  });
+
+  it("retains daily-maintenance artifacts for the 2,400-cycle horizon", () => {
+    const workflow = readFileSync(
+      path.join(projectRoot, ".github/workflows/daily-maintenance.yml"),
+      "utf8"
+    );
+
+    expect(workflow).toContain("uses: actions/upload-artifact@v6");
+    expect(workflow).toContain("retention-days: 100");
   });
 });
