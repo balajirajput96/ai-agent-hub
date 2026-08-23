@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { Suspense, lazy } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Router, Switch } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ChatDashboard from "./pages/ChatDashboard";
@@ -12,37 +13,39 @@ const FacebookProfileWorkspace = lazy(
 );
 const HindiReelsWorkspace = lazy(() => import("./pages/HindiReelsWorkspace"));
 
-function Router() {
+function AppRoutes() {
   // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
-      <Route path={"/"} component={ChatDashboard} />
-      <Route path={"/facebook-profile"}>
-        <Suspense
-          fallback={
-            <main className="min-h-screen bg-slate-950 p-8 text-slate-200">
-              Loading workspace…
-            </main>
-          }
-        >
-          <FacebookProfileWorkspace />
-        </Suspense>
-      </Route>
-      <Route path={"/hindi-reels"}>
-        <Suspense
-          fallback={
-            <main className="min-h-screen bg-slate-950 p-8 text-slate-200">
-              Loading workspace…
-            </main>
-          }
-        >
-          <HindiReelsWorkspace />
-        </Suspense>
-      </Route>
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <Router hook={useHashLocation}>
+      <Switch>
+        <Route path={"/"} component={ChatDashboard} />
+        <Route path={"/facebook-profile"}>
+          <Suspense
+            fallback={
+              <main className="min-h-screen bg-slate-950 p-8 text-slate-200">
+                Loading workspace…
+              </main>
+            }
+          >
+            <FacebookProfileWorkspace />
+          </Suspense>
+        </Route>
+        <Route path={"/hindi-reels"}>
+          <Suspense
+            fallback={
+              <main className="min-h-screen bg-slate-950 p-8 text-slate-200">
+                Loading workspace…
+              </main>
+            }
+          >
+            <HindiReelsWorkspace />
+          </Suspense>
+        </Route>
+        <Route path={"/404"} component={NotFound} />
+        {/* Final fallback route */}
+        <Route component={NotFound} />
+      </Switch>
+    </Router>
   );
 }
 
@@ -60,7 +63,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AppRoutes />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

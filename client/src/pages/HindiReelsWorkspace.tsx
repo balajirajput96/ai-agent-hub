@@ -35,7 +35,7 @@ export default function HindiReelsWorkspace() {
               asChild
               className="w-full bg-indigo-600 hover:bg-indigo-500"
             >
-              <a href="/">Return to Agent Hub</a>
+              <a href="#/">Return to Agent Hub</a>
             </Button>
           </CardContent>
         </Card>
@@ -74,7 +74,7 @@ export default function HindiReelsWorkspace() {
               variant="outline"
               className="border-slate-700 bg-slate-900 text-slate-200"
             >
-              <a href="/">
+              <a href="#/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Agent Hub
               </a>

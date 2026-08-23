@@ -405,7 +405,7 @@ export default function ChatDashboard() {
             Private workspace
           </h2>
           <a
-            href="/facebook-profile"
+            href="#/facebook-profile"
             className="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3 text-xs transition-colors hover:bg-cyan-500/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/70"
           >
             <span>
@@ -419,7 +419,7 @@ export default function ChatDashboard() {
             <Sparkles className="ml-3 h-4 w-4 shrink-0 text-cyan-300" />
           </a>
           <a
-            href="/hindi-reels"
+            href="#/hindi-reels"
             className="mt-2 flex items-center justify-between rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 text-xs transition-colors hover:bg-indigo-500/10 focus:outline-none focus:ring-2 focus:ring-indigo-400/70"
           >
             <span>
