@@ -7,6 +7,7 @@ import {
   REEL_TARGET,
   getBatchNumber,
   getNextEligibleReelNumber,
+  getQueuedRetryCountForOwner,
   getReelUniqueKey,
 } from "./services/reelCatalog";
 
@@ -53,5 +54,19 @@ describe("Reel 0001 catalog definition", () => {
     expect(
       getNextEligibleReelNumber([{ reelNumber: 1, status: "uploaded" }])
     ).toBe(2);
+  });
+
+  it("excludes another owner’s queued retry from the current owner’s count", () => {
+    const retryRows = [
+      { reel_retry_queue: { status: "queued" }, reel_catalog: { userId: 101 } },
+      { reel_retry_queue: { status: "queued" }, reel_catalog: { userId: 202 } },
+      {
+        reel_retry_queue: { status: "resolved" },
+        reel_catalog: { userId: 101 },
+      },
+    ];
+
+    expect(getQueuedRetryCountForOwner(retryRows, 101)).toBe(1);
+    expect(getQueuedRetryCountForOwner(retryRows, 202)).toBe(1);
   });
 });

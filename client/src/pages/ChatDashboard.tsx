@@ -27,6 +27,7 @@ import {
   MessageSquare,
   User as UserIcon,
   Sparkles,
+  Clapperboard,
   Layers,
   Paperclip,
   FileText,
@@ -416,6 +417,20 @@ export default function ChatDashboard() {
               </span>
             </span>
             <Sparkles className="ml-3 h-4 w-4 shrink-0 text-cyan-300" />
+          </a>
+          <a
+            href="/hindi-reels"
+            className="mt-2 flex items-center justify-between rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 text-xs transition-colors hover:bg-indigo-500/10 focus:outline-none focus:ring-2 focus:ring-indigo-400/70"
+          >
+            <span>
+              <span className="block font-medium text-indigo-100">
+                Hindi reels catalog
+              </span>
+              <span className="mt-1 block leading-relaxed text-slate-400">
+                Private research, evidence labels, and production status only.
+              </span>
+            </span>
+            <Clapperboard className="ml-3 h-4 w-4 shrink-0 text-indigo-300" />
           </a>
         </div>
 

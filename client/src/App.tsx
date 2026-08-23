@@ -10,6 +10,7 @@ import ChatDashboard from "./pages/ChatDashboard";
 const FacebookProfileWorkspace = lazy(
   () => import("./pages/FacebookProfileWorkspace")
 );
+const HindiReelsWorkspace = lazy(() => import("./pages/HindiReelsWorkspace"));
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -25,6 +26,17 @@ function Router() {
           }
         >
           <FacebookProfileWorkspace />
+        </Suspense>
+      </Route>
+      <Route path={"/hindi-reels"}>
+        <Suspense
+          fallback={
+            <main className="min-h-screen bg-slate-950 p-8 text-slate-200">
+              Loading workspace…
+            </main>
+          }
+        >
+          <HindiReelsWorkspace />
         </Suspense>
       </Route>
       <Route path={"/404"} component={NotFound} />

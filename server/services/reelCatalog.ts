@@ -42,6 +42,20 @@ export function getNextEligibleReelNumber(
   return Math.min(highest + 1, targetReels);
 }
 
+export function getQueuedRetryCountForOwner(
+  retryRows: Array<{
+    reel_retry_queue: { status: string };
+    reel_catalog: { userId: number };
+  }>,
+  userId: number
+) {
+  return retryRows.filter(
+    row =>
+      row.reel_retry_queue.status === "queued" &&
+      row.reel_catalog.userId === userId
+  ).length;
+}
+
 export const REEL_0001 = {
   reelNumber: 1,
   title: "आदत 21 दिन में नहीं बनती: सही cue क्यों ज़रूरी है",
@@ -127,7 +141,10 @@ export async function getReelProductionStatus(userId: number) {
   const retryItems = await db
     .select()
     .from(reelRetryQueue)
-    .where(eq(reelRetryQueue.status, "queued"));
+    .innerJoin(reelCatalog, eq(reelRetryQueue.reelId, reelCatalog.id))
+    .where(
+      and(eq(reelRetryQueue.status, "queued"), eq(reelCatalog.userId, userId))
+    );
   const completedReels = reels.filter(
     reel => reel.status === "uploaded"
   ).length;
@@ -145,7 +162,7 @@ export async function getReelProductionStatus(userId: number) {
     completedReels,
     researchReadyReels,
     mediaBlockedReels,
-    retryQueuedReels: retryItems.length,
+    retryQueuedReels: getQueuedRetryCountForOwner(retryItems, userId),
     currentBatchNumber: getBatchNumber(nextReelNumber),
     nextReelNumber,
     currentCapacityBoundary: control?.currentCapacityBoundary ?? null,
