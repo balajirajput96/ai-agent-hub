@@ -7,7 +7,7 @@
   "batchCount": 100,
   "verifiedProgress": {
     "uploadedReels": [1],
-    "researchReadyReels": [2, 3, 4, 5, 6, 7, 8],
+    "researchReadyReels": [2, 3, 4, 5, 6, 7, 8, 9],
     "retryQueue": [
       {
         "reelNumber": 2,
@@ -43,11 +43,16 @@
         "reelNumber": 8,
         "pipelineStage": "visuals",
         "failureCategory": "generation_capacity_limit"
+      },
+      {
+        "reelNumber": 9,
+        "pipelineStage": "visuals",
+        "failureCategory": "generation_capacity_limit"
       }
     ],
     "nextEligibleReel": 2
   },
-  "capacityBoundary": "On 2026-08-23, Reel 0002 primary reference-image generation and one 8-second 720x1280 visual span succeeded; its verified interim narration, captions, plan, reference, and visual span are preserved in Batch_001. A second visual-span request was rejected because the free-plan video quota is exhausted (1/1). Reels 0002–0008 remain research-ready and no queued reel may be marked completed until full media, QC, and Drive verification finish.",
+  "capacityBoundary": "On 2026-08-24, Reel 0002 visual span 02 v02 was generated, technically verified as an 8-second 720x1280 H.264/AAC MP4, and Drive-verified in Batch_001 alongside the prior narration, captions, plan, reference, and visual span 01. Based on the prior one-video-per-day provider pattern, no duplicate same-day request was made; at least five planned visual spans, final assembly, QC, and final Drive-video verification remain. Reel 0009 is now research-ready with a verified Batch_001 source record and an explicit visual retry. The local manifest is current; in-place Drive manifest content verification remains a separate retry boundary after client HTTP errors. No queued reel may be marked completed until full media, QC, and Drive verification finish.",
   "atomicCompletionRule": [
     "Rendered video exists",
     "Quality control passes",
