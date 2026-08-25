@@ -7,7 +7,7 @@
   "batchCount": 100,
   "verifiedProgress": {
     "uploadedReels": [1],
-    "researchReadyReels": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "researchReadyReels": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     "retryQueue": [
       {
         "reelNumber": 2,
@@ -53,11 +53,16 @@
         "reelNumber": 10,
         "pipelineStage": "visuals",
         "failureCategory": "generation_capacity_limit"
+      },
+      {
+        "reelNumber": 11,
+        "pipelineStage": "visuals",
+        "failureCategory": "generation_capacity_limit"
       }
     ],
     "nextEligibleReel": 2
   },
-  "capacityBoundary": "On 2026-08-25, Reel 0002 visual span 03 v01 was generated, technically verified as an 8-second 720x1280 H.264/AAC MP4, and Drive-verified in Batch_001 alongside the prior narration, captions, plan, reference, and visual spans 01–02. At least four planned visual spans, final assembly, QC, and final Drive-video verification remain. Reels 0009 and 0010 are research-ready with verified Batch_001 source records and explicit visual retries. The existing Drive master manifest file identity and current JSON content were re-verified through the supported Drive media path after the earlier client HTTP and backend errors. No queued reel may be marked completed until full media, QC, and Drive verification finish.",
+  "capacityBoundary": "On 2026-08-25, Reel 0002 visual span 03 v01 was generated, technically verified as an 8-second 720x1280 H.264/AAC MP4, and Drive-verified in Batch_001 alongside the prior narration, captions, plan, reference, and visual spans 01–02. At least four planned visual spans, final assembly, QC, and final Drive-video verification remain. Reels 0009, 0010, and 0011 are research-ready with verified Batch_001 source records and explicit visual retries. The existing Drive master manifest file identity and current JSON content were re-verified through the supported Drive media path after the earlier client HTTP and backend errors. No queued reel may be marked completed until full media, QC, and Drive verification finish.",
   "atomicCompletionRule": [
     "Rendered video exists",
     "Quality control passes",
